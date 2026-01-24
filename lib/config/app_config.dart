@@ -1,6 +1,6 @@
 class AppConfig {
   // API Configuration
-  static const String apiBaseUrl = 'http://192.168.220.1:3000';
+  static const String apiBaseUrl = 'http://localhost:3000';
 
   // Timeout Configuration
   static const Duration apiTimeout = Duration(seconds: 30);

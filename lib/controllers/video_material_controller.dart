@@ -11,11 +11,13 @@ class VideoMaterialController extends GetxController {
   final showControls = true.obs;
   final isFullscreen = false.obs;
 
+  final int topikId;
   final String videoUrl;
   final String materialTitle;
   final String chapterName;
 
   VideoMaterialController({
+    required this.topikId,
     required this.videoUrl,
     required this.materialTitle,
     required this.chapterName,
@@ -107,7 +109,11 @@ class VideoMaterialController extends GetxController {
     // Navigate to quiz screen
     Get.toNamed(
       '/quiz',
-      arguments: {'materialTitle': materialTitle, 'chapterName': chapterName},
+      arguments: {
+        'topikId': topikId,
+        'materialTitle': materialTitle,
+        'chapterName': chapterName,
+      },
     );
   }
 

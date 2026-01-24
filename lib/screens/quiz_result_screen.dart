@@ -12,6 +12,7 @@ class QuizResultScreen extends StatelessWidget {
     final result = args['result'] as QuizResult;
     final materialTitle = args['materialTitle'] as String;
     final chapterName = args['chapterName'] as String;
+    final topikId = args['topikId'] as int?;
 
     final isPassed = result.passed;
 
@@ -208,6 +209,7 @@ class QuizResultScreen extends StatelessWidget {
                         Get.offNamed(
                           '/quiz',
                           arguments: {
+                            'topikId': topikId,
                             'materialTitle': materialTitle,
                             'chapterName': chapterName,
                           },

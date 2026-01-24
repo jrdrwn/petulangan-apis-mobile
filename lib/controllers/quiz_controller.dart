@@ -1,22 +1,37 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/quiz_model.dart';
+import '../services/api_service.dart';
+import '../services/connectivity_service.dart';
+import '../services/auth_service.dart';
 
 class QuizController extends GetxController {
+  final int topikId;
   final String materialTitle;
   final String chapterName;
 
-  QuizController({required this.materialTitle, required this.chapterName});
+  QuizController({
+    required this.topikId,
+    required this.materialTitle,
+    required this.chapterName,
+  });
+
+  // Services
+  final ApiService _apiService = ApiService();
+  final ConnectivityService _connectivityService = ConnectivityService();
+  late final AuthService _authService;
 
   // Observable variables
+  final isLoading = true.obs;
+  final isSubmitting = false.obs;
   final currentQuestionIndex = 0.obs;
   final selectedAnswerId = ''.obs;
-  final timeRemaining = 45.obs; // 45 seconds per question
+  final timeRemaining = 0.obs; // Will be set from API data
   final isTimeUp = false.obs; // Track if time is up for current question
 
   Timer? _timer;
+  List<QuizModel> quizData = []; // Store API data
   late List<Question> questions;
   final List<String> userAnswers = []; // Store all user answers
   final List<int> questionTimers = []; // Store remaining time for each question
@@ -25,81 +40,89 @@ class QuizController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initializeQuestions();
-    _loadCurrentAnswer(); // Load answer if returning to this question
-    _startTimer();
+    _authService = Get.find<AuthService>();
+    _fetchQuizData();
+  }
+
+  Future<void> _fetchQuizData() async {
+    try {
+      isLoading.value = true;
+
+      // Check authentication
+      if (_authService.token.value == null) {
+        Get.snackbar(
+          'Error',
+          'Anda belum login. Silakan login terlebih dahulu.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        Get.offAllNamed('/login-student');
+        return;
+      }
+
+      // Check internet connection
+      final hasConnection = await _connectivityService.hasConnection();
+      if (!hasConnection) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Periksa koneksi internet Anda dan coba lagi.',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        Get.back();
+        return;
+      }
+
+      // Fetch quiz data from API
+      quizData = await _apiService.getQuiz(topikId, _authService.token.value!);
+
+      if (quizData.isEmpty) {
+        Get.snackbar(
+          'Tidak Ada Data',
+          'Tidak ada soal quiz untuk materi ini.',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        Get.back();
+        return;
+      }
+
+      // Transform API data to UI models
+      _initializeQuestions();
+      _loadCurrentAnswer(); // Load answer if returning to this question
+      _startTimer();
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal memuat data quiz: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      Get.back();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void _initializeQuestions() {
-    // Sample questions - you can replace with real data from API
-    List<Question> allQuestions = [
-      Question(
-        id: '1',
-        question:
-            'Perubahan lingkungan tempat tinggal dari masa lalu hingga kini menunjukkan bahwa suatu daerah dapat berkembang. Faktor utama yang paling mempengaruhi perkembangan tersebut adalah',
-        answers: [
-          Answer(id: 'A', text: 'Legenda Daerah'),
-          Answer(id: 'B', text: 'Bentuk Bangunan Kuno'),
-          Answer(id: 'C', text: 'Jumlah Penduduk dan Aktivitas Manusia'),
-          Answer(id: 'D', text: 'Cerita Rakyat Setempat'),
-        ],
-        correctAnswerId: 'C',
-      ),
-      Question(
-        id: '2',
-        question:
-            'Mengapa cerita tentang peristiwa yang benar-benar terjadi di masa lalu hingga kini disebut sebagai sejarah?',
-        answers: [
-          Answer(id: 'A', text: 'Karena diwariskan secara lisan'),
-          Answer(id: 'B', text: 'Karena mengandung nilai budaya'),
-          Answer(id: 'C', text: 'Karena berkaitan dengan kerajaan'),
-          Answer(id: 'D', text: 'Karena berdasarkan kejadian nyata'),
-        ],
-        correctAnswerId: 'D',
-      ),
-      Question(
-        id: '3',
-        question: 'Apa yang membedakan sejarah lokal dengan sejarah nasional?',
-        answers: [
-          Answer(id: 'A', text: 'Sejarah lokal hanya menceritakan legenda'),
-          Answer(id: 'B', text: 'Sejarah lokal fokus pada daerah tertentu'),
-          Answer(id: 'C', text: 'Sejarah lokal tidak memiliki bukti'),
-          Answer(id: 'D', text: 'Sejarah lokal lebih penting'),
-        ],
-        correctAnswerId: 'B',
-      ),
-      Question(
-        id: '4',
-        question:
-            'Mengapa mempelajari sejarah daerah tempat tinggal kita penting?',
-        answers: [
-          Answer(id: 'A', text: 'Untuk mendapat nilai bagus'),
-          Answer(id: 'B', text: 'Untuk menjadi terkenal'),
-          Answer(id: 'C', text: 'Untuk memahami identitas dan budaya lokal'),
-          Answer(id: 'D', text: 'Untuk membuat cerita baru'),
-        ],
-        correctAnswerId: 'C',
-      ),
-      Question(
-        id: '5',
-        question:
-            'Mengapa peninggalan sejarah daerah perlu dijaga dan dilestarikan?',
-        answers: [
-          Answer(id: 'A', text: 'Agar diganti dengan bangunan baru'),
-          Answer(id: 'B', text: 'Agar terlihat lebih modern'),
-          Answer(id: 'C', text: 'Supaya dapat dijual ke luar negeri'),
-          Answer(
-            id: 'D',
-            text: 'Sebagai bukti kejayaan masa lalu dan identitas daerah',
-          ),
-        ],
-        correctAnswerId: 'D',
-      ),
-    ];
+    // Transform QuizModel (API) to Question (UI model)
+    questions = quizData.map((quiz) {
+      // Transform pilihan_ganda Map to List<Answer>
+      final answers = quiz.pilihanGanda.entries.map((entry) {
+        return Answer(id: entry.key, text: entry.value);
+      }).toList();
 
-    // Shuffle questions randomly
-    allQuestions.shuffle(Random());
-    questions = allQuestions;
+      return Question(
+        id: quiz.id.toString(),
+        question: quiz.nama,
+        answers: answers,
+        correctAnswerId: quiz.jawaban,
+      );
+    }).toList();
 
     // Initialize userAnswers list with empty strings
     userAnswers.clear();
@@ -107,7 +130,8 @@ class QuizController extends GetxController {
     timeUpFlags.clear();
     for (int i = 0; i < questions.length; i++) {
       userAnswers.add('');
-      questionTimers.add(45); // 45 seconds for each question
+      // Use durasi from API data for each question
+      questionTimers.add(quizData[i].durasi);
       timeUpFlags.add(false); // No time up initially
     }
   }
@@ -271,37 +295,100 @@ class QuizController extends GetxController {
     _submitQuiz();
   }
 
-  void _submitQuiz() {
-    // Calculate results
-    int correctCount = 0;
-    int wrongCount = 0;
+  Future<void> _submitQuiz() async {
+    try {
+      isSubmitting.value = true;
 
-    for (int i = 0; i < questions.length; i++) {
-      if (userAnswers[i].isEmpty) {
-        wrongCount++;
-      } else if (userAnswers[i] == questions[i].correctAnswerId) {
-        correctCount++;
-      } else {
-        wrongCount++;
+      // Check authentication
+      if (_authService.token.value == null) {
+        Get.snackbar(
+          'Error',
+          'Anda belum login. Silakan login terlebih dahulu.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        Get.offAllNamed('/login-student');
+        return;
       }
+
+      // Check internet connection
+      final hasConnection = await _connectivityService.hasConnection();
+      if (!hasConnection) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Periksa koneksi internet Anda dan coba lagi.',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        isSubmitting.value = false;
+        return;
+      }
+
+      // Prepare quiz answers - use empty string for unanswered questions
+      final hasilQuiz = <QuizAnswerItem>[];
+      for (int i = 0; i < questions.length; i++) {
+        hasilQuiz.add(
+          QuizAnswerItem(
+            quizId: int.parse(questions[i].id),
+            jawaban: userAnswers[i].isEmpty ? '' : userAnswers[i],
+          ),
+        );
+      }
+
+      final request = QuizSubmitRequest(hasilQuiz: hasilQuiz);
+
+      // Submit to API
+      final response = await _apiService.submitQuiz(
+        topikId,
+        request,
+        _authService.token.value!,
+      );
+
+      // Calculate results for UI
+      int correctCount = 0;
+      int wrongCount = 0;
+
+      for (int i = 0; i < questions.length; i++) {
+        if (userAnswers[i].isEmpty) {
+          wrongCount++;
+        } else if (userAnswers[i] == questions[i].correctAnswerId) {
+          correctCount++;
+        } else {
+          wrongCount++;
+        }
+      }
+
+      final result = QuizResult(
+        totalQuestions: questions.length,
+        correctAnswers: correctCount,
+        wrongAnswers: wrongCount,
+        passed: correctCount >= (questions.length * 0.6), // 60% to pass
+        percentage: (correctCount / questions.length) * 100,
+      );
+
+      // Success - navigate to result screen
+      Get.offNamed(
+        '/quiz-complete',
+        arguments: {
+          'result': result,
+          'materialTitle': materialTitle,
+          'chapterName': chapterName,
+          'topikId': topikId,
+        },
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal submit quiz: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isSubmitting.value = false;
     }
-
-    final result = QuizResult(
-      totalQuestions: questions.length,
-      correctAnswers: correctCount,
-      wrongAnswers: wrongCount,
-      passed: correctCount >= (questions.length * 0.6), // 60% to pass
-      percentage: (correctCount / questions.length) * 100,
-    );
-
-    Get.offNamed(
-      '/quiz-complete',
-      arguments: {
-        'result': result,
-        'materialTitle': materialTitle,
-        'chapterName': chapterName,
-      },
-    );
   }
 
   Question get currentQuestion => questions[currentQuestionIndex.value];

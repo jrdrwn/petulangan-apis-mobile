@@ -29,6 +29,16 @@ class DashboardStudentController extends GetxController {
     fetchBabTopik();
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    // Check if should refresh from quiz completion
+    final args = Get.arguments;
+    if (args != null && args is Map && args['refresh'] == true) {
+      fetchBabTopik();
+    }
+  }
+
   Future<void> fetchBabTopik() async {
     try {
       // Check if logged in
@@ -228,6 +238,7 @@ class DashboardStudentController extends GetxController {
               Get.toNamed(
                 Routes.VIDEO_MATERIAL,
                 arguments: {
+                  'topikId': topik.id,
                   'videoUrl': topik.topikUrl,
                   'materialTitle': '${topik.kode}. ${topik.judul}',
                   'chapterName': 'BAB ${bab.nomor}',

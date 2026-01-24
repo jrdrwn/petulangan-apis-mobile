@@ -13,6 +13,7 @@ class QuizCompleteScreen extends StatelessWidget {
     final result = args['result'] as QuizResult;
     final materialTitle = args['materialTitle'] as String;
     final chapterName = args['chapterName'] as String;
+    final topikId = args['topikId'] as int?;
 
     final isPassed = result.passed;
 
@@ -114,12 +115,13 @@ class QuizCompleteScreen extends StatelessWidget {
                                 Expanded(
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Get.off(
-                                        () => const QuizResultScreen(),
+                                      Get.offNamed(
+                                        '/quiz-result',
                                         arguments: {
                                           'result': result,
                                           'materialTitle': materialTitle,
                                           'chapterName': chapterName,
+                                          'topikId': topikId,
                                         },
                                       );
                                     },
@@ -151,13 +153,17 @@ class QuizCompleteScreen extends StatelessWidget {
                                   child: ElevatedButton(
                                     onPressed: () {
                                       if (isPassed) {
-                                        // Lanjut - go to dashboard
-                                        Get.offAllNamed('/dashboard-student');
+                                        // Lanjut - go to dashboard and refresh
+                                        Get.offAllNamed(
+                                          '/dashboard-student',
+                                          arguments: {'refresh': true},
+                                        );
                                       } else {
                                         // Belajar Lagi - go back to video material
                                         Get.offNamed(
                                           '/video-material',
                                           arguments: {
+                                            'topikId': topikId,
                                             'videoUrl':
                                                 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
                                             'materialTitle': materialTitle,

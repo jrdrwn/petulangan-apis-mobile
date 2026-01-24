@@ -11,6 +11,7 @@ class VideoMaterialScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get arguments passed from dashboard
     final args = Get.arguments as Map<String, dynamic>;
+    final topikId = args['topikId'] as int;
     final videoUrl = args['videoUrl'] as String;
     final materialTitle = args['materialTitle'] as String;
     final chapterName = args['chapterName'] as String;
@@ -18,6 +19,7 @@ class VideoMaterialScreen extends StatelessWidget {
     // Initialize controller with arguments
     final controller = Get.put(
       VideoMaterialController(
+        topikId: topikId,
         videoUrl: videoUrl,
         materialTitle: materialTitle,
         chapterName: chapterName,

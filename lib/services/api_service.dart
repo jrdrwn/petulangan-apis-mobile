@@ -5,6 +5,7 @@ import '../models/sekolah_model.dart';
 import '../models/kelas_model.dart';
 import '../models/peserta_didik_model.dart';
 import '../models/bab_model.dart';
+import '../models/quiz_model.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -110,6 +111,75 @@ class ApiService {
         );
       } else {
         throw ApiException('Gagal mengambil data bab', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // Get quiz questions by topik_id with authorization
+  Future<List<QuizModel>> getQuiz(int topikId, String token) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/quiz/$topikId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((json) => QuizModel.fromJson(json)).toList();
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Unauthorized - Token tidak valid',
+          response.statusCode,
+        );
+      } else {
+        throw ApiException('Gagal mengambil data quiz', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // Submit quiz answers
+  Future<QuizSubmitResponse> submitQuiz(
+    int topikId,
+    QuizSubmitRequest request,
+    String token,
+  ) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/quiz/$topikId/submit'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: json.encode(request.toJson()),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return QuizSubmitResponse.fromJson(data);
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Unauthorized - Token tidak valid',
+          response.statusCode,
+        );
+      } else {
+        final error = json.decode(response.body);
+        throw ApiException(
+          error['message'] ?? 'Gagal submit quiz',
+          response.statusCode,
+        );
       }
     } catch (e) {
       if (e is ApiException) rethrow;
