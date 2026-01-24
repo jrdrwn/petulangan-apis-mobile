@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/register_student_controller.dart';
+import '../models/sekolah_model.dart';
+import '../models/kelas_model.dart';
 
 class RegisterStudentScreen extends StatelessWidget {
   const RegisterStudentScreen({super.key});
@@ -171,32 +173,58 @@ class RegisterStudentScreen extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 25),
                         child: Obx(
-                          () => DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              isExpanded: true,
-                              hint: const Text(
-                                '-Pilih Sekolah-',
-                                style: TextStyle(
-                                  color: Color(0xFF9DB4C8),
-                                  fontSize: 14,
+                          () => controller.isLoadingSekolah.value
+                              ? const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 18),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      SizedBox(width: 15),
+                                      Text(
+                                        'Memuat data sekolah...',
+                                        style: TextStyle(
+                                          color: Color(0xFF9DB4C8),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : DropdownButtonHideUnderline(
+                                  child: DropdownButton<SekolahModel>(
+                                    isExpanded: true,
+                                    hint: const Text(
+                                      '-Pilih Sekolah-',
+                                      style: TextStyle(
+                                        color: Color(0xFF9DB4C8),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    value: controller.selectedSekolah.value,
+                                    icon: const Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: Color(0xFF1565C0),
+                                    ),
+                                    items: controller.sekolahList.map((
+                                      SekolahModel sekolah,
+                                    ) {
+                                      return DropdownMenuItem<SekolahModel>(
+                                        value: sekolah,
+                                        child: Text(
+                                          sekolah.nama,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: controller.onSekolahChanged,
+                                  ),
                                 ),
-                              ),
-                              value: controller.selectedSchool.value,
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Color(0xFF1565C0),
-                              ),
-                              items: controller.schools.map((String school) {
-                                return DropdownMenuItem<String>(
-                                  value: school,
-                                  child: Text(school),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                controller.selectedSchool.value = newValue;
-                              },
-                            ),
-                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -215,71 +243,141 @@ class RegisterStudentScreen extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 25),
                         child: Obx(
-                          () => DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              isExpanded: true,
-                              hint: const Text(
-                                '-Pilih Kelas-',
-                                style: TextStyle(
-                                  color: Color(0xFF9DB4C8),
-                                  fontSize: 14,
+                          () => controller.isLoadingKelas.value
+                              ? const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 18),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      SizedBox(width: 15),
+                                      Text(
+                                        'Memuat data kelas...',
+                                        style: TextStyle(
+                                          color: Color(0xFF9DB4C8),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : DropdownButtonHideUnderline(
+                                  child: DropdownButton<KelasModel>(
+                                    isExpanded: true,
+                                    hint: const Text(
+                                      '-Pilih Kelas-',
+                                      style: TextStyle(
+                                        color: Color(0xFF9DB4C8),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    value: controller.selectedKelas.value,
+                                    icon: const Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: Color(0xFF1565C0),
+                                    ),
+                                    items: controller.kelasList.map((
+                                      KelasModel kelas,
+                                    ) {
+                                      return DropdownMenuItem<KelasModel>(
+                                        value: kelas,
+                                        child: Text(
+                                          'Kelas ${kelas.nama}',
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: controller.onKelasChanged,
+                                  ),
                                 ),
-                              ),
-                              value: controller.selectedClass.value,
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Color(0xFF1565C0),
-                              ),
-                              items: controller.classes.map((String kelas) {
-                                return DropdownMenuItem<String>(
-                                  value: kelas,
-                                  child: Text(kelas),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                controller.selectedClass.value = newValue;
-                              },
-                            ),
-                          ),
                         ),
                       ),
                       const SizedBox(height: 15),
                       Align(
                         alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: controller.goToLogin,
-                          child: Text(
-                            'Sudah Terdaftar',
-                            style: GoogleFonts.montserrat(
-                              color: Color(0xFF1565C0),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.underline,
-                              decorationColor: Color(0xFF1565C0),
+                        child: Obx(
+                          () => TextButton(
+                            onPressed: controller.isRegistering.value
+                                ? null
+                                : controller.goToLogin,
+                            child: Text(
+                              'Sudah Terdaftar',
+                              style: GoogleFonts.montserrat(
+                                color: controller.isRegistering.value
+                                    ? const Color(
+                                        0xFF1565C0,
+                                      ).withValues(alpha: 0.5)
+                                    : const Color(0xFF1565C0),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                                decorationColor: controller.isRegistering.value
+                                    ? const Color(
+                                        0xFF1565C0,
+                                      ).withValues(alpha: 0.5)
+                                    : const Color(0xFF1565C0),
+                              ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 20),
                       const Spacer(),
-                      ElevatedButton(
-                        onPressed: controller.register,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1565C0),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      Obx(
+                        () => ElevatedButton(
+                          onPressed: controller.isRegistering.value
+                              ? null
+                              : controller.register,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1565C0),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            minimumSize: const Size(double.infinity, 56),
+                            elevation: 5,
+                            disabledBackgroundColor: const Color(
+                              0xFF1565C0,
+                            ).withValues(alpha: 0.6),
                           ),
-                          minimumSize: const Size(double.infinity, 56),
-                          elevation: 5,
-                        ),
-                        child: Text(
-                          'DAFTAR',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          child: controller.isRegistering.value
+                              ? const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      'MENDAFTAR...',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  'DAFTAR',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 30),
