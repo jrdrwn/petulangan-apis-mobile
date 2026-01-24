@@ -7,6 +7,7 @@ class RegisterStudentController extends GetxController {
   final konfirmasiNisnController = TextEditingController();
 
   final selectedSchool = Rxn<String>();
+  final selectedClass = Rxn<String>();
 
   final schools = <String>[
     'SD Negeri 1',
@@ -15,6 +16,8 @@ class RegisterStudentController extends GetxController {
     'SD Swasta ABC',
     'SD Swasta XYZ',
   ];
+
+  final classes = <String>['Kelas IV', 'Kelas V', 'Kelas VI'];
 
   @override
   void onClose() {
