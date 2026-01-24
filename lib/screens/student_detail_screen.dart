@@ -88,9 +88,121 @@ class StudentDetailScreen extends StatelessWidget {
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
                   child: Obx(() {
-                    final detail = controller.studentDetail.value;
-                    if (detail == null) {
-                      return const CircularProgressIndicator();
+                    if (controller.isLoading.value) {
+                      return Container(
+                        constraints: const BoxConstraints(maxWidth: 450),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(50),
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    if (controller.errorMessage.isNotEmpty) {
+                      return Container(
+                        constraints: const BoxConstraints(maxWidth: 450),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(25),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 60,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Error: ${controller.errorMessage.value}',
+                              style: const TextStyle(color: Colors.red),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: controller.goBack,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Kembali'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    if (controller.nilaiData.isEmpty) {
+                      return Container(
+                        constraints: const BoxConstraints(maxWidth: 450),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(25),
+                        child: Column(
+                          children: [
+                            Text(
+                              controller.name.toUpperCase(),
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: const Color(0xFF1D4B8B),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              controller.nisn,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1D4B8B),
+                              ),
+                            ),
+                            const SizedBox(height: 25),
+                            const Text(
+                              'Belum ada data nilai',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: controller.goBack,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Kembali'),
+                            ),
+                          ],
+                        ),
+                      );
                     }
 
                     return Container(
@@ -112,7 +224,7 @@ class StudentDetailScreen extends StatelessWidget {
                         children: [
                           // Student Info Header
                           Text(
-                            detail.name.toUpperCase(),
+                            controller.name.toUpperCase(),
                             textAlign: TextAlign.center,
                             style: GoogleFonts.montserrat(
                               fontSize: 22,
@@ -123,7 +235,7 @@ class StudentDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            detail.nisn,
+                            controller.nisn,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.montserrat(
                               fontSize: 18,
@@ -139,22 +251,6 @@ class StudentDetailScreen extends StatelessWidget {
                             scrollDirection: Axis.horizontal,
                             child: Container(
                               constraints: const BoxConstraints(minWidth: 400),
-                              // decoration: BoxDecoration(
-                              //   gradient: const LinearGradient(
-                              //     begin: Alignment.topLeft,
-                              //     end: Alignment.bottomRight,
-                              //     colors: [
-                              //       Color(0xFFF5F5F5),
-                              //       Color(0xFFE8E8E8),
-                              //     ],
-                              //   ),
-                              //   borderRadius: BorderRadius.circular(20),
-                              //   border: Border.all(
-                              //     color: Colors.grey.shade300,
-                              //     width: 2,
-                              //   ),
-                              // ),
-                              // padding: const EdgeInsets.all(20),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -193,10 +289,10 @@ class StudentDetailScreen extends StatelessWidget {
 
                                   const SizedBox(height: 15),
 
-                                  // Chapter list
-                                  ...detail.chapters.map((chapter) {
+                                  // Chapter list from API
+                                  ...controller.nilaiData.map((bab) {
                                     return _buildCollapsibleChapter(
-                                      chapter,
+                                      bab,
                                       controller,
                                     );
                                   }).toList(),
@@ -254,29 +350,43 @@ class StudentDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCollapsibleChapter(chapter, controller) {
+  Widget _buildCollapsibleChapter(bab, controller) {
     return Obx(() {
-      final isExpanded = controller.isChapterExpanded(chapter.chapterId);
+      final isExpanded = controller.isChapterExpanded(bab.id);
 
+      // Calculate average score from topics
+      int? averageScore;
+      double totalScore = 0;
+      int countScore = 0;
+
+      for (var topik in bab.topik) {
+        if (topik.nilaiQuiz != null) {
+          totalScore += topik.nilaiQuiz!.nilai;
+          countScore++;
+        }
+      }
+
+      if (countScore > 0) {
+        averageScore = (totalScore / countScore).round();
+      }
+
+      // Determine status
+      String status;
       Color statusColor;
       IconData statusIconData;
 
-      switch (chapter.status) {
-        case 'completed':
-          statusColor = const Color(0xFF4CAF50);
-          statusIconData = Icons.check_circle;
-          break;
-        case 'in-progress':
-          statusColor = const Color(0xFFFFA726);
-          statusIconData = Icons.warning_amber_rounded;
-          break;
-        case 'locked':
-          statusColor = Colors.grey.shade600;
-          statusIconData = Icons.lock;
-          break;
-        default:
-          statusColor = Colors.grey;
-          statusIconData = Icons.help;
+      if (countScore == bab.topik.length) {
+        status = 'Selesai';
+        statusColor = const Color(0xFF4CAF50);
+        statusIconData = Icons.check_circle;
+      } else if (countScore > 0) {
+        status = 'Proses';
+        statusColor = const Color(0xFFFFA726);
+        statusIconData = Icons.warning_amber_rounded;
+      } else {
+        status = 'Belum';
+        statusColor = Colors.grey.shade600;
+        statusIconData = Icons.lock;
       }
 
       return Column(
@@ -284,8 +394,8 @@ class StudentDetailScreen extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              if (chapter.topics.isNotEmpty) {
-                controller.toggleChapter(chapter.chapterId);
+              if (bab.topik.isNotEmpty) {
+                controller.toggleChapter(bab.id);
               }
             },
             borderRadius: BorderRadius.circular(12),
@@ -310,7 +420,7 @@ class StudentDetailScreen extends StatelessWidget {
                     width: 220,
                     child: Row(
                       children: [
-                        if (chapter.topics.isNotEmpty)
+                        if (bab.topik.isNotEmpty)
                           Icon(
                             isExpanded
                                 ? Icons.keyboard_arrow_down
@@ -318,7 +428,7 @@ class StudentDetailScreen extends StatelessWidget {
                             size: 20,
                             color: Colors.grey.shade700,
                           ),
-                        if (chapter.topics.isNotEmpty) const SizedBox(width: 5),
+                        if (bab.topik.isNotEmpty) const SizedBox(width: 5),
                         Expanded(
                           child: RichText(
                             maxLines: 2,
@@ -326,7 +436,7 @@ class StudentDetailScreen extends StatelessWidget {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: '${chapter.chapterNumber}: ',
+                                  text: '${bab.nomor}: ',
                                   style: GoogleFonts.montserrat(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
@@ -334,7 +444,7 @@ class StudentDetailScreen extends StatelessWidget {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: chapter.chapterTitle,
+                                  text: bab.judul,
                                   style: GoogleFonts.montserrat(
                                     fontSize: 13,
                                     color: Colors.black87,
@@ -356,7 +466,7 @@ class StudentDetailScreen extends StatelessWidget {
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            chapter.statusText,
+                            status,
                             style: GoogleFonts.montserrat(
                               fontSize: 11,
                               color: statusColor,
@@ -374,7 +484,7 @@ class StudentDetailScreen extends StatelessWidget {
                     width: 80,
                     child: Center(
                       child: Text(
-                        chapter.score?.toString() ?? '-',
+                        averageScore?.toString() ?? '-',
                         style: GoogleFonts.montserrat(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -388,10 +498,10 @@ class StudentDetailScreen extends StatelessWidget {
             ),
           ),
           // Topics (collapsed/expanded)
-          if (isExpanded && chapter.topics.isNotEmpty) ...[
+          if (isExpanded && bab.topik.isNotEmpty) ...[
             const SizedBox(height: 8),
-            ...chapter.topics.map((topic) {
-              return _buildTopicRow(topic);
+            ...bab.topik.map((topik) {
+              return _buildTopicRow(topik);
             }).toList(),
           ],
           const SizedBox(height: 12),
@@ -400,7 +510,20 @@ class StudentDetailScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildTopicRow(topic) {
+  Widget _buildTopicRow(topik) {
+    // Calculate stars based on score (0-100 scale to 0-3 stars)
+    int stars = 0;
+    if (topik.nilaiQuiz != null) {
+      final nilai = topik.nilaiQuiz!.nilai;
+      if (nilai >= 80) {
+        stars = 3;
+      } else if (nilai >= 60) {
+        stars = 2;
+      } else if (nilai >= 40) {
+        stars = 1;
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       margin: const EdgeInsets.only(bottom: 6),
@@ -427,7 +550,7 @@ class StudentDetailScreen extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    topic.topicTitle,
+                    '${topik.kode}. ${topik.judul}',
                     style: GoogleFonts.montserrat(
                       fontSize: 12,
                       color: Colors.black87,
@@ -448,9 +571,9 @@ class StudentDetailScreen extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(right: 3),
                   child: Icon(
-                    index < topic.stars ? Icons.star : Icons.star_border,
+                    index < stars ? Icons.star : Icons.star_border,
                     size: 16,
-                    color: index < topic.stars
+                    color: index < stars
                         ? const Color(0xFFFFC107)
                         : Colors.grey.shade400,
                   ),
@@ -463,7 +586,7 @@ class StudentDetailScreen extends StatelessWidget {
             width: 80,
             child: Center(
               child: Text(
-                topic.score?.toString() ?? '-',
+                topik.nilaiQuiz?.nilai.toString() ?? '-',
                 style: GoogleFonts.montserrat(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

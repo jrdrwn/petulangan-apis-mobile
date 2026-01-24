@@ -318,3 +318,369 @@ abstract class _LoginResponse implements LoginResponse {
   _$$LoginResponseImplCopyWith<_$LoginResponseImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
+
+LoginGuruRequest _$LoginGuruRequestFromJson(Map<String, dynamic> json) {
+  return _LoginGuruRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LoginGuruRequest {
+  String get nip => throw _privateConstructorUsedError;
+  String get password => throw _privateConstructorUsedError;
+  @JsonKey(name: 'sekolah_id')
+  int get sekolahId => throw _privateConstructorUsedError;
+
+  /// Serializes this LoginGuruRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of LoginGuruRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $LoginGuruRequestCopyWith<LoginGuruRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LoginGuruRequestCopyWith<$Res> {
+  factory $LoginGuruRequestCopyWith(
+    LoginGuruRequest value,
+    $Res Function(LoginGuruRequest) then,
+  ) = _$LoginGuruRequestCopyWithImpl<$Res, LoginGuruRequest>;
+  @useResult
+  $Res call({
+    String nip,
+    String password,
+    @JsonKey(name: 'sekolah_id') int sekolahId,
+  });
+}
+
+/// @nodoc
+class _$LoginGuruRequestCopyWithImpl<$Res, $Val extends LoginGuruRequest>
+    implements $LoginGuruRequestCopyWith<$Res> {
+  _$LoginGuruRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of LoginGuruRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? nip = null,
+    Object? password = null,
+    Object? sekolahId = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            nip: null == nip
+                ? _value.nip
+                : nip // ignore: cast_nullable_to_non_nullable
+                      as String,
+            password: null == password
+                ? _value.password
+                : password // ignore: cast_nullable_to_non_nullable
+                      as String,
+            sekolahId: null == sekolahId
+                ? _value.sekolahId
+                : sekolahId // ignore: cast_nullable_to_non_nullable
+                      as int,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$LoginGuruRequestImplCopyWith<$Res>
+    implements $LoginGuruRequestCopyWith<$Res> {
+  factory _$$LoginGuruRequestImplCopyWith(
+    _$LoginGuruRequestImpl value,
+    $Res Function(_$LoginGuruRequestImpl) then,
+  ) = __$$LoginGuruRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String nip,
+    String password,
+    @JsonKey(name: 'sekolah_id') int sekolahId,
+  });
+}
+
+/// @nodoc
+class __$$LoginGuruRequestImplCopyWithImpl<$Res>
+    extends _$LoginGuruRequestCopyWithImpl<$Res, _$LoginGuruRequestImpl>
+    implements _$$LoginGuruRequestImplCopyWith<$Res> {
+  __$$LoginGuruRequestImplCopyWithImpl(
+    _$LoginGuruRequestImpl _value,
+    $Res Function(_$LoginGuruRequestImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of LoginGuruRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? nip = null,
+    Object? password = null,
+    Object? sekolahId = null,
+  }) {
+    return _then(
+      _$LoginGuruRequestImpl(
+        nip: null == nip
+            ? _value.nip
+            : nip // ignore: cast_nullable_to_non_nullable
+                  as String,
+        password: null == password
+            ? _value.password
+            : password // ignore: cast_nullable_to_non_nullable
+                  as String,
+        sekolahId: null == sekolahId
+            ? _value.sekolahId
+            : sekolahId // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$LoginGuruRequestImpl implements _LoginGuruRequest {
+  const _$LoginGuruRequestImpl({
+    required this.nip,
+    required this.password,
+    @JsonKey(name: 'sekolah_id') required this.sekolahId,
+  });
+
+  factory _$LoginGuruRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LoginGuruRequestImplFromJson(json);
+
+  @override
+  final String nip;
+  @override
+  final String password;
+  @override
+  @JsonKey(name: 'sekolah_id')
+  final int sekolahId;
+
+  @override
+  String toString() {
+    return 'LoginGuruRequest(nip: $nip, password: $password, sekolahId: $sekolahId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LoginGuruRequestImpl &&
+            (identical(other.nip, nip) || other.nip == nip) &&
+            (identical(other.password, password) ||
+                other.password == password) &&
+            (identical(other.sekolahId, sekolahId) ||
+                other.sekolahId == sekolahId));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, nip, password, sekolahId);
+
+  /// Create a copy of LoginGuruRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LoginGuruRequestImplCopyWith<_$LoginGuruRequestImpl> get copyWith =>
+      __$$LoginGuruRequestImplCopyWithImpl<_$LoginGuruRequestImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LoginGuruRequestImplToJson(this);
+  }
+}
+
+abstract class _LoginGuruRequest implements LoginGuruRequest {
+  const factory _LoginGuruRequest({
+    required final String nip,
+    required final String password,
+    @JsonKey(name: 'sekolah_id') required final int sekolahId,
+  }) = _$LoginGuruRequestImpl;
+
+  factory _LoginGuruRequest.fromJson(Map<String, dynamic> json) =
+      _$LoginGuruRequestImpl.fromJson;
+
+  @override
+  String get nip;
+  @override
+  String get password;
+  @override
+  @JsonKey(name: 'sekolah_id')
+  int get sekolahId;
+
+  /// Create a copy of LoginGuruRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$LoginGuruRequestImplCopyWith<_$LoginGuruRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+LoginGuruResponse _$LoginGuruResponseFromJson(Map<String, dynamic> json) {
+  return _LoginGuruResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LoginGuruResponse {
+  String get token => throw _privateConstructorUsedError;
+
+  /// Serializes this LoginGuruResponse to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of LoginGuruResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $LoginGuruResponseCopyWith<LoginGuruResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LoginGuruResponseCopyWith<$Res> {
+  factory $LoginGuruResponseCopyWith(
+    LoginGuruResponse value,
+    $Res Function(LoginGuruResponse) then,
+  ) = _$LoginGuruResponseCopyWithImpl<$Res, LoginGuruResponse>;
+  @useResult
+  $Res call({String token});
+}
+
+/// @nodoc
+class _$LoginGuruResponseCopyWithImpl<$Res, $Val extends LoginGuruResponse>
+    implements $LoginGuruResponseCopyWith<$Res> {
+  _$LoginGuruResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of LoginGuruResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? token = null}) {
+    return _then(
+      _value.copyWith(
+            token: null == token
+                ? _value.token
+                : token // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$LoginGuruResponseImplCopyWith<$Res>
+    implements $LoginGuruResponseCopyWith<$Res> {
+  factory _$$LoginGuruResponseImplCopyWith(
+    _$LoginGuruResponseImpl value,
+    $Res Function(_$LoginGuruResponseImpl) then,
+  ) = __$$LoginGuruResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String token});
+}
+
+/// @nodoc
+class __$$LoginGuruResponseImplCopyWithImpl<$Res>
+    extends _$LoginGuruResponseCopyWithImpl<$Res, _$LoginGuruResponseImpl>
+    implements _$$LoginGuruResponseImplCopyWith<$Res> {
+  __$$LoginGuruResponseImplCopyWithImpl(
+    _$LoginGuruResponseImpl _value,
+    $Res Function(_$LoginGuruResponseImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of LoginGuruResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? token = null}) {
+    return _then(
+      _$LoginGuruResponseImpl(
+        token: null == token
+            ? _value.token
+            : token // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$LoginGuruResponseImpl implements _LoginGuruResponse {
+  const _$LoginGuruResponseImpl({required this.token});
+
+  factory _$LoginGuruResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LoginGuruResponseImplFromJson(json);
+
+  @override
+  final String token;
+
+  @override
+  String toString() {
+    return 'LoginGuruResponse(token: $token)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LoginGuruResponseImpl &&
+            (identical(other.token, token) || other.token == token));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, token);
+
+  /// Create a copy of LoginGuruResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LoginGuruResponseImplCopyWith<_$LoginGuruResponseImpl> get copyWith =>
+      __$$LoginGuruResponseImplCopyWithImpl<_$LoginGuruResponseImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LoginGuruResponseImplToJson(this);
+  }
+}
+
+abstract class _LoginGuruResponse implements LoginGuruResponse {
+  const factory _LoginGuruResponse({required final String token}) =
+      _$LoginGuruResponseImpl;
+
+  factory _LoginGuruResponse.fromJson(Map<String, dynamic> json) =
+      _$LoginGuruResponseImpl.fromJson;
+
+  @override
+  String get token;
+
+  /// Create a copy of LoginGuruResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$LoginGuruResponseImplCopyWith<_$LoginGuruResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}

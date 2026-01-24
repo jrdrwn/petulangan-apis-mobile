@@ -1,24 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../models/login_model.dart';
+import '../models/sekolah_model.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
+import '../services/connectivity_service.dart';
 
 class LoginTeacherController extends GetxController {
-  final namaController = TextEditingController();
+  final nipController = TextEditingController();
   final passwordController = TextEditingController();
 
-  final selectedSchool = Rxn<String>();
+  final selectedSchool = Rxn<SekolahModel>();
   final obscurePassword = true.obs;
+  final isLogging = false.obs;
+  final isLoadingSchools = false.obs;
 
-  final schools = <String>[
-    'SD Negeri 1',
-    'SD Negeri 2',
-    'SD Negeri 3',
-    'SD Swasta ABC',
-    'SD Swasta XYZ',
-  ];
+  final schools = <SekolahModel>[].obs;
+
+  final ApiService _apiService = ApiService();
+  final ConnectivityService _connectivityService = ConnectivityService();
+  late final AuthService _authService;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _authService = Get.put(AuthService(), permanent: true);
+    _fetchSekolah();
+  }
+
+  Future<void> _fetchSekolah() async {
+    try {
+      isLoadingSchools.value = true;
+
+      // Check internet connection
+      final hasConnection = await _connectivityService.hasConnection();
+      if (!hasConnection) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Periksa koneksi internet Anda dan coba lagi.',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      schools.value = await _apiService.getSekolah();
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal memuat data sekolah: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoadingSchools.value = false;
+    }
+  }
 
   @override
   void onClose() {
-    namaController.dispose();
+    nipController.dispose();
     passwordController.dispose();
     super.onClose();
   }
@@ -27,9 +70,9 @@ class LoginTeacherController extends GetxController {
     obscurePassword.value = !obscurePassword.value;
   }
 
-  void login() {
-    // TODO: Implement teacher login logic
-    if (namaController.text.isEmpty ||
+  Future<void> login() async {
+    // Validate inputs
+    if (nipController.text.isEmpty ||
         passwordController.text.isEmpty ||
         selectedSchool.value == null) {
       Get.snackbar(
@@ -42,14 +85,63 @@ class LoginTeacherController extends GetxController {
       return;
     }
 
-    // Navigate to class selection screen
-    Get.offNamed(
-      '/select-class',
-      arguments: {
-        'teacherName': namaController.text,
-        'school': selectedSchool.value,
-      },
-    );
+    try {
+      isLogging.value = true;
+
+      // Check internet connection
+      final hasConnection = await _connectivityService.hasConnection();
+      if (!hasConnection) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Periksa koneksi internet Anda dan coba lagi.',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      // Create login request
+      final request = LoginGuruRequest(
+        nip: nipController.text,
+        password: passwordController.text,
+        sekolahId: selectedSchool.value!.id,
+      );
+
+      // Call login API
+      await _authService.loginGuru(request);
+
+      // Save teacher name (NIP for now)
+      await _authService.saveName(nipController.text);
+
+      Get.snackbar(
+        'Berhasil',
+        'Login berhasil!',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
+      // Navigate to class selection screen
+      Get.offNamed(
+        '/select-class',
+        arguments: {
+          'teacherNip': nipController.text,
+          'school': selectedSchool.value!.nama,
+          'sekolahId': selectedSchool.value!.id,
+        },
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Login Gagal',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLogging.value = false;
+    }
   }
 
   void goToStudentLogin() {

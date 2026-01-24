@@ -55,6 +55,37 @@ class AuthService {
     }
   }
 
+  Future<LoginGuruResponse> loginGuru(LoginGuruRequest request) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${AppConfig.apiBaseUrl}/guru/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(request.toJson()),
+          )
+          .timeout(AppConfig.apiTimeout);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        final loginResponse = LoginGuruResponse.fromJson(data);
+
+        // Save token
+        await saveToken(loginResponse.token);
+
+        return loginResponse;
+      } else {
+        final error = json.decode(response.body);
+        throw ApiException(
+          error['message'] ?? 'Login gagal',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
   Future<void> saveToken(String newToken) async {
     token.value = newToken;
     // TODO: Persist to storage

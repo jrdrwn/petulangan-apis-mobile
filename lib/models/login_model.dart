@@ -18,3 +18,23 @@ class LoginResponse with _$LoginResponse {
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>
       _$LoginResponseFromJson(json);
 }
+
+@freezed
+class LoginGuruRequest with _$LoginGuruRequest {
+  const factory LoginGuruRequest({
+    required String nip,
+    required String password,
+    @JsonKey(name: 'sekolah_id') required int sekolahId,
+  }) = _LoginGuruRequest;
+
+  factory LoginGuruRequest.fromJson(Map<String, dynamic> json) =>
+      _$LoginGuruRequestFromJson(json);
+}
+
+@freezed
+class LoginGuruResponse with _$LoginGuruResponse {
+  const factory LoginGuruResponse({required String token}) = _LoginGuruResponse;
+
+  factory LoginGuruResponse.fromJson(Map<String, dynamic> json) =>
+      _$LoginGuruResponseFromJson(json);
+}

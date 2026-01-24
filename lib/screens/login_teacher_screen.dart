@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/login_teacher_controller.dart';
+import '../models/sekolah_model.dart';
 
 class LoginTeacherScreen extends StatelessWidget {
   const LoginTeacherScreen({super.key});
@@ -78,9 +79,10 @@ class LoginTeacherScreen extends StatelessWidget {
                           ],
                         ),
                         child: TextField(
-                          controller: controller.namaController,
+                          controller: controller.nipController,
+                          keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                            hintText: 'Nama Lengkap',
+                            hintText: 'NIP (Nomor Induk Pegawai)',
                             hintStyle: TextStyle(
                               color: Color(0xFF9DB4C8),
                               fontSize: 14,
@@ -151,53 +153,100 @@ class LoginTeacherScreen extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 25),
                         child: Obx(
-                          () => DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              isExpanded: true,
-                              hint: const Text(
-                                '-Pilih Sekolah-',
-                                style: TextStyle(
-                                  color: Color(0xFF9DB4C8),
-                                  fontSize: 14,
+                          () => controller.isLoadingSchools.value
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF1565C0),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : DropdownButtonHideUnderline(
+                                  child: DropdownButton<SekolahModel>(
+                                    isExpanded: true,
+                                    hint: const Text(
+                                      '-Pilih Sekolah-',
+                                      style: TextStyle(
+                                        color: Color(0xFF9DB4C8),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    value: controller.selectedSchool.value,
+                                    icon: const Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: Color(0xFF1565C0),
+                                    ),
+                                    items: controller.schools.map((
+                                      SekolahModel school,
+                                    ) {
+                                      return DropdownMenuItem<SekolahModel>(
+                                        value: school,
+                                        child: Text(school.nama),
+                                      );
+                                    }).toList(),
+                                    onChanged: (SekolahModel? newValue) {
+                                      controller.selectedSchool.value =
+                                          newValue;
+                                    },
+                                  ),
                                 ),
-                              ),
-                              value: controller.selectedSchool.value,
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Color(0xFF1565C0),
-                              ),
-                              items: controller.schools.map((String school) {
-                                return DropdownMenuItem<String>(
-                                  value: school,
-                                  child: Text(school),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                controller.selectedSchool.value = newValue;
-                              },
-                            ),
-                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: controller.login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1565C0),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      Obx(
+                        () => ElevatedButton(
+                          onPressed: controller.isLogging.value
+                              ? null
+                              : controller.login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1565C0),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            minimumSize: const Size(double.infinity, 56),
+                            elevation: 5,
+                            disabledBackgroundColor: const Color(
+                              0xFF1565C0,
+                            ).withValues(alpha: 0.6),
                           ),
-                          minimumSize: const Size(double.infinity, 56),
-                          elevation: 5,
-                        ),
-                        child: Text(
-                          'MASUK',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          child: controller.isLogging.value
+                              ? const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      'MASUK...',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  'MASUK',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                       const Spacer(),

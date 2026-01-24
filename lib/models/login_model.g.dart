@@ -17,3 +17,27 @@ _$LoginResponseImpl _$$LoginResponseImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$LoginResponseImplToJson(_$LoginResponseImpl instance) =>
     <String, dynamic>{'token': instance.token};
+
+_$LoginGuruRequestImpl _$$LoginGuruRequestImplFromJson(
+  Map<String, dynamic> json,
+) => _$LoginGuruRequestImpl(
+  nip: json['nip'] as String,
+  password: json['password'] as String,
+  sekolahId: (json['sekolah_id'] as num).toInt(),
+);
+
+Map<String, dynamic> _$$LoginGuruRequestImplToJson(
+  _$LoginGuruRequestImpl instance,
+) => <String, dynamic>{
+  'nip': instance.nip,
+  'password': instance.password,
+  'sekolah_id': instance.sekolahId,
+};
+
+_$LoginGuruResponseImpl _$$LoginGuruResponseImplFromJson(
+  Map<String, dynamic> json,
+) => _$LoginGuruResponseImpl(token: json['token'] as String);
+
+Map<String, dynamic> _$$LoginGuruResponseImplToJson(
+  _$LoginGuruResponseImpl instance,
+) => <String, dynamic>{'token': instance.token};

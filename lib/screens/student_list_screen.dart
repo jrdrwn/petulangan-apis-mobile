@@ -123,126 +123,186 @@ class StudentListScreen extends StatelessWidget {
                         const SizedBox(height: 25),
 
                         // Table with horizontal scroll
-                        Obx(() {
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.grey.shade300,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                                width: 1.5,
                               ),
-                              child: Column(
-                                children: [
-                                  // Table Header
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(12),
-                                        topRight: Radius.circular(12),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        SizedBox(
-                                          width: 50,
-                                          child: _buildHeaderCell('NO'),
-                                        ),
-                                        _buildVerticalDivider(),
-                                        SizedBox(
-                                          width: 140,
-                                          child: _buildHeaderCell('NISN'),
-                                        ),
-                                        _buildVerticalDivider(),
-                                        SizedBox(
-                                          width: 180,
-                                          child: _buildHeaderCell('NAMA'),
-                                        ),
-                                        _buildVerticalDivider(),
-                                        SizedBox(
-                                          width: 100,
-                                          child: _buildHeaderCell('AKSI'),
-                                        ),
-                                      ],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                // Table Header
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      topRight: Radius.circular(12),
                                     ),
                                   ),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 50,
+                                        child: _buildHeaderCell('NO'),
+                                      ),
+                                      _buildVerticalDivider(),
+                                      SizedBox(
+                                        width: 140,
+                                        child: _buildHeaderCell('NISN'),
+                                      ),
+                                      _buildVerticalDivider(),
+                                      SizedBox(
+                                        width: 180,
+                                        child: _buildHeaderCell('NAMA'),
+                                      ),
+                                      _buildVerticalDivider(),
+                                      SizedBox(
+                                        width: 100,
+                                        child: _buildHeaderCell('AKSI'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
 
-                                  // Table Rows
-                                  ...controller.students.asMap().entries.map((
-                                    entry,
-                                  ) {
-                                    final index = entry.key;
-                                    final student = entry.value;
-                                    final isLast =
-                                        index == controller.students.length - 1;
+                                // Table Rows with loading/error states
+                                Obx(() {
+                                  if (controller.isLoading.value) {
+                                    return const Padding(
+                                      padding: EdgeInsets.all(20.0),
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
 
-                                    return Column(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: index.isEven
-                                                ? Colors.white
-                                                : Colors.grey.shade50,
-                                            borderRadius: isLast
-                                                ? const BorderRadius.only(
-                                                    bottomLeft: Radius.circular(
-                                                      12,
-                                                    ),
-                                                    bottomRight:
-                                                        Radius.circular(12),
-                                                  )
-                                                : BorderRadius.zero,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 50,
-                                                child: _buildDataCell(
-                                                  (index + 1).toString(),
+                                  if (controller.errorMessage.isNotEmpty) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(20.0),
+                                      child: Text(
+                                        'Error: ${controller.errorMessage.value}',
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    );
+                                  }
+
+                                  if (controller.pesertaDidik.isEmpty) {
+                                    return const Padding(
+                                      padding: EdgeInsets.all(20.0),
+                                      child: Center(
+                                        child: Text(
+                                          'Tidak ada peserta didik',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  return Column(
+                                    children: [
+                                      ...controller.pesertaDidik
+                                          .asMap()
+                                          .entries
+                                          .map((entry) {
+                                            final index = entry.key;
+                                            final student = entry.value;
+                                            final isLast =
+                                                index ==
+                                                controller.pesertaDidik.length -
+                                                    1;
+
+                                            return Column(
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: index.isEven
+                                                        ? Colors.white
+                                                        : Colors.grey.shade50,
+                                                    borderRadius: isLast
+                                                        ? const BorderRadius.only(
+                                                            bottomLeft:
+                                                                Radius.circular(
+                                                                  12,
+                                                                ),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                  12,
+                                                                ),
+                                                          )
+                                                        : BorderRadius.zero,
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 50,
+                                                        child: _buildDataCell(
+                                                          (index + 1)
+                                                              .toString(),
+                                                        ),
+                                                      ),
+                                                      _buildVerticalDivider(),
+                                                      SizedBox(
+                                                        width: 140,
+                                                        child: _buildDataCell(
+                                                          student.nisn,
+                                                        ),
+                                                      ),
+                                                      _buildVerticalDivider(),
+                                                      SizedBox(
+                                                        width: 180,
+                                                        child: _buildDataCell(
+                                                          student.namaLengkap,
+                                                        ),
+                                                      ),
+                                                      _buildVerticalDivider(),
+                                                      SizedBox(
+                                                        width: 100,
+                                                        child: _buildActionCell(
+                                                          student,
+                                                          controller,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
+                                                if (!isLast)
+                                                  Divider(
+                                                    height: 1,
+                                                    thickness: 1,
+                                                    color: Colors.grey.shade300,
+                                                  ),
+                                              ],
+                                            );
+                                          })
+                                          .toList(),
+                                      if (controller.hasMore.value)
+                                        Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: ElevatedButton(
+                                            onPressed: controller.loadMore,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: const Color(
+                                                0xFF1565C0,
                                               ),
-                                              _buildVerticalDivider(),
-                                              SizedBox(
-                                                width: 140,
-                                                child: _buildDataCell(
-                                                  student.nisn,
-                                                ),
-                                              ),
-                                              _buildVerticalDivider(),
-                                              SizedBox(
-                                                width: 180,
-                                                child: _buildDataCell(
-                                                  student.name,
-                                                ),
-                                              ),
-                                              _buildVerticalDivider(),
-                                              SizedBox(
-                                                width: 100,
-                                                child: _buildActionCell(
-                                                  student,
-                                                  controller,
-                                                ),
-                                              ),
-                                            ],
+                                              foregroundColor: Colors.white,
+                                            ),
+                                            child: const Text('Muat Lebih'),
                                           ),
                                         ),
-                                        if (!isLast)
-                                          Divider(
-                                            height: 1,
-                                            thickness: 1,
-                                            color: Colors.grey.shade300,
-                                          ),
-                                      ],
-                                    );
-                                  }).toList(),
-                                ],
-                              ),
+                                    ],
+                                  );
+                                }),
+                              ],
                             ),
-                          );
-                        }),
+                          ),
+                        ),
 
                         const SizedBox(height: 25),
 

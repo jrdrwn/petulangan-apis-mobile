@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/select_class_controller.dart';
-import '../models/class_model.dart';
+import '../models/kelas_model.dart';
 
 class SelectClassScreen extends StatelessWidget {
   const SelectClassScreen({super.key});
@@ -125,8 +125,38 @@ class SelectClassScreen extends StatelessWidget {
 
                         const SizedBox(height: 50),
 
-                        // Class buttons
+                        // Class buttons with loading/error states
                         Obx(() {
+                          if (controller.isLoading.value) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          if (controller.errorMessage.isNotEmpty) {
+                            return Column(
+                              children: [
+                                Text(
+                                  'Error: ${controller.errorMessage.value}',
+                                  style: const TextStyle(color: Colors.red),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  onPressed: controller.goBack,
+                                  child: const Text('Kembali'),
+                                ),
+                              ],
+                            );
+                          }
+
+                          if (controller.availableClasses.isEmpty) {
+                            return const Text(
+                              'Tidak ada kelas tersedia',
+                              style: TextStyle(color: Colors.grey),
+                            );
+                          }
+
                           return Column(
                             children: controller.availableClasses.map((kelas) {
                               return Padding(
@@ -167,7 +197,7 @@ class SelectClassScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            kelas.displayName,
+            kelas.nama,
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
               fontSize: 20,
