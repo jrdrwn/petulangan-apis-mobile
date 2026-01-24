@@ -4,6 +4,7 @@ import '../config/app_config.dart';
 import '../models/sekolah_model.dart';
 import '../models/kelas_model.dart';
 import '../models/peserta_didik_model.dart';
+import '../models/bab_model.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -79,6 +80,36 @@ class ApiService {
           error['message'] ?? 'Gagal mendaftar peserta didik',
           response.statusCode,
         );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // Get bab and topik with authorization
+  Future<List<BabModel>> getBabTopik(String token) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/bab/topik'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((json) => BabModel.fromJson(json)).toList();
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Unauthorized - Token tidak valid',
+          response.statusCode,
+        );
+      } else {
+        throw ApiException('Gagal mengambil data bab', response.statusCode);
       }
     } catch (e) {
       if (e is ApiException) rethrow;

@@ -48,7 +48,7 @@ class DashboardStudentScreen extends StatelessWidget {
                     color: Color(0xFFCD3551),
                     size: 25,
                   ),
-                  onPressed: () => Get.back(),
+                  onPressed: controller.logout,
                 ),
               ),
               // Main content
@@ -123,96 +123,119 @@ class DashboardStudentScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   // Scrollable content with chapters
                   Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final containerWidth = constraints.maxWidth;
-                        final containerHeight = constraints.maxHeight;
-
-                        return Container(
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage('assets/images/maps.png'),
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
-                            ),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                left: containerWidth * 0.01,
-                                top: containerHeight * 0.01,
-                                child: Image(
-                                  image: AssetImage(
-                                    'assets/images/idashboard.png',
+                    child: Obx(
+                      () => controller.isLoadingBab.value
+                          ? const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    color: Colors.white,
                                   ),
-                                  width: containerWidth * 0.5,
-                                ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'Memuat materi...',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              // Chapter buttons with responsive positioning
-                              Positioned(
-                                right: containerWidth * 0.20,
-                                top: containerHeight * 0.24,
-                                child: _ChapterButton(
-                                  label: 'BAB VI',
-                                  controller: controller,
-                                  screenWidth: containerWidth,
-                                  onPressed: () {
-                                    controller.showChapterDialog(
-                                      'BAB VI',
-                                      context,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Positioned(
-                                left: containerWidth * 0.20,
-                                top: containerHeight * 0.38,
-                                child: _ChapterButton(
-                                  label: 'BAB V',
-                                  controller: controller,
-                                  screenWidth: containerWidth,
-                                  onPressed: () {
-                                    controller.showChapterDialog(
-                                      'BAB V',
-                                      context,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Positioned(
-                                right: containerWidth * 0.03,
-                                top: containerHeight * 0.47,
-                                child: _ChapterButton(
-                                  label: 'BAB VIII',
-                                  controller: controller,
-                                  screenWidth: containerWidth,
-                                  onPressed: () {
-                                    controller.showChapterDialog(
-                                      'BAB VIII',
-                                      context,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Positioned(
-                                left: containerWidth * 0.16,
-                                top: containerHeight * 0.70,
-                                child: _ChapterButton(
-                                  label: 'BAB VII',
-                                  controller: controller,
-                                  screenWidth: containerWidth,
-                                  onPressed: () {
-                                    controller.showChapterDialog(
-                                      'BAB VII',
-                                      context,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                            )
+                          : LayoutBuilder(
+                              builder: (context, constraints) {
+                                final containerWidth = constraints.maxWidth;
+                                final containerHeight = constraints.maxHeight;
+
+                                return Container(
+                                  decoration: const BoxDecoration(
+                                    image: DecorationImage(
+                                      image: AssetImage(
+                                        'assets/images/maps.png',
+                                      ),
+                                      fit: BoxFit.cover,
+                                      alignment: Alignment.topCenter,
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Positioned(
+                                        left: containerWidth * 0.01,
+                                        top: containerHeight * 0.01,
+                                        child: Image(
+                                          image: AssetImage(
+                                            'assets/images/idashboard.png',
+                                          ),
+                                          width: containerWidth * 0.5,
+                                        ),
+                                      ),
+                                      // Chapter buttons with responsive positioning
+                                      Positioned(
+                                        right: containerWidth * 0.20,
+                                        top: containerHeight * 0.24,
+                                        child: _ChapterButton(
+                                          label: 'BAB VI',
+                                          controller: controller,
+                                          screenWidth: containerWidth,
+                                          onPressed: () {
+                                            controller.showChapterDialog(
+                                              'BAB VI',
+                                              context,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Positioned(
+                                        left: containerWidth * 0.20,
+                                        top: containerHeight * 0.38,
+                                        child: _ChapterButton(
+                                          label: 'BAB V',
+                                          controller: controller,
+                                          screenWidth: containerWidth,
+                                          onPressed: () {
+                                            controller.showChapterDialog(
+                                              'BAB V',
+                                              context,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: containerWidth * 0.03,
+                                        top: containerHeight * 0.47,
+                                        child: _ChapterButton(
+                                          label: 'BAB VIII',
+                                          controller: controller,
+                                          screenWidth: containerWidth,
+                                          onPressed: () {
+                                            controller.showChapterDialog(
+                                              'BAB VIII',
+                                              context,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Positioned(
+                                        left: containerWidth * 0.16,
+                                        top: containerHeight * 0.70,
+                                        child: _ChapterButton(
+                                          label: 'BAB VII',
+                                          controller: controller,
+                                          screenWidth: containerWidth,
+                                          onPressed: () {
+                                            controller.showChapterDialog(
+                                              'BAB VII',
+                                              context,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                     ),
                   ),
                 ],

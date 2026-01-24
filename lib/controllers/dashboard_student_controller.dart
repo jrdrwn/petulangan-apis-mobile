@@ -1,56 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-// import '../routes/app_routes.dart';
-// Replace with the main library file that declares 'part' for app_routes.dart
 import '../routes/app_pages.dart';
-
-// Model untuk Materi
-class Materi {
-  final String title;
-  final bool isUnlocked;
-
-  Materi({required this.title, required this.isUnlocked});
-}
+import '../models/bab_model.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
+import '../services/connectivity_service.dart';
 
 class DashboardStudentController extends GetxController {
-  final studentName = ''.obs;
+  final ApiService _apiService = ApiService();
+  late final AuthService _authService;
+  final ConnectivityService _connectivityService = ConnectivityService();
 
-  // Data materi untuk setiap bab
-  final Map<String, List<Materi>> chapterMaterials = {
-    'BAB V': [
-      Materi(title: 'Materi 1', isUnlocked: true),
-      Materi(title: 'Materi 2', isUnlocked: false),
-      Materi(title: 'Materi 3', isUnlocked: false),
-    ],
-    'BAB VI': [
-      Materi(title: 'Materi 1', isUnlocked: true),
-      Materi(title: 'Materi 2', isUnlocked: false),
-      Materi(title: 'Materi 3', isUnlocked: false),
-    ],
-    'BAB VII': [
-      Materi(title: 'Materi 1', isUnlocked: false),
-      Materi(title: 'Materi 2', isUnlocked: false),
-      Materi(title: 'Materi 3', isUnlocked: false),
-    ],
-    'BAB VIII': [
-      Materi(title: 'Materi 1', isUnlocked: false),
-      Materi(title: 'Materi 2', isUnlocked: false),
-      Materi(title: 'Materi 3', isUnlocked: false),
-    ],
-  };
+  final studentName = ''.obs;
+  final babList = <BabModel>[].obs;
+  final isLoadingBab = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments as Map<String, dynamic>?;
-    if (args != null && args['studentName'] != null) {
-      studentName.value = args['studentName'];
+    // Get shared AuthService instance
+    _authService = Get.find<AuthService>();
+
+    // Get student name from auth service
+    studentName.value = _authService.getUserName() ?? 'Siswa';
+
+    // Fetch bab and topik
+    fetchBabTopik();
+  }
+
+  Future<void> fetchBabTopik() async {
+    try {
+      // Check if logged in
+      if (!_authService.isLoggedIn()) {
+        Get.offNamed(Routes.LOGIN_STUDENT);
+        return;
+      }
+
+      // Check internet connection
+      if (!await _connectivityService.hasConnection()) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Mohon periksa koneksi internet Anda',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          icon: const Icon(Icons.wifi_off, color: Colors.white),
+        );
+        return;
+      }
+
+      isLoadingBab.value = true;
+      final token = _authService.getToken()!;
+      final babs = await _apiService.getBabTopik(token);
+      babList.value = babs;
+    } catch (e) {
+      // Check if unauthorized
+      if (e.toString().contains('Unauthorized') ||
+          e.toString().contains('401')) {
+        Get.snackbar(
+          'Session Expired',
+          'Silakan login kembali',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          icon: const Icon(Icons.error_outline, color: Colors.white),
+        );
+        await _authService.logout();
+        Get.offNamed(Routes.LOGIN_STUDENT);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Gagal memuat data: ${e.toString()}',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          icon: const Icon(Icons.error_outline, color: Colors.white),
+          duration: const Duration(seconds: 4),
+        );
+      }
+    } finally {
+      isLoadingBab.value = false;
     }
   }
 
+  // Check if a chapter (by roman numeral) has unlocked material
+  bool hasUnlockedMaterial(String chapter) {
+    // Remove 'BAB ' prefix to get just roman numeral
+    final romanNumeral = chapter.replaceAll('BAB ', '');
+
+    final bab = babList.firstWhereOrNull((b) => b.nomor == romanNumeral);
+
+    if (bab == null) return false;
+
+    // Check if any topik is unlocked
+    return bab.topik.any((t) => t.unlocked);
+  }
+
+  // Get bab by roman numeral
+  BabModel? getBabByNomor(String chapter) {
+    final romanNumeral = chapter.replaceAll('BAB ', '');
+    return babList.firstWhereOrNull((b) => b.nomor == romanNumeral);
+  }
+
   void showChapterDialog(String chapter, BuildContext context) {
-    final materials = chapterMaterials[chapter] ?? [];
+    final bab = getBabByNomor(chapter);
+
+    if (bab == null) {
+      Get.snackbar(
+        'Info',
+        'Materi belum tersedia',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
 
     showDialog(
       context: context,
@@ -126,11 +191,8 @@ class DashboardStudentController extends GetxController {
                               alignment: WrapAlignment.spaceAround,
                               runAlignment: WrapAlignment.center,
                               crossAxisAlignment: WrapCrossAlignment.center,
-                              children: materials
-                                  .map(
-                                    (materi) =>
-                                        _buildMateriItem(materi, chapter),
-                                  )
+                              children: bab.topik
+                                  .map((topik) => _buildTopikItem(topik, bab))
                                   .toList(),
                             ),
                           ),
@@ -157,19 +219,19 @@ class DashboardStudentController extends GetxController {
     );
   }
 
-  Widget _buildMateriItem(Materi materi, String chapter) {
+  Widget _buildTopikItem(TopikModel topik, BabModel bab) {
     return InkWell(
-      onTap: materi.isUnlocked
+      onTap: topik.unlocked
           ? () {
               Get.back();
               // Navigate to video material screen
               Get.toNamed(
                 Routes.VIDEO_MATERIAL,
                 arguments: {
-                  'videoUrl':
-                      'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-                  'materialTitle': materi.title,
-                  'chapterName': chapter,
+                  'videoUrl': topik.topikUrl,
+                  'materialTitle': '${topik.kode}. ${topik.judul}',
+                  'chapterName': 'BAB ${bab.nomor}',
+                  'description': topik.deskripsi,
                 },
               );
             }
@@ -178,7 +240,7 @@ class DashboardStudentController extends GetxController {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: materi.isUnlocked
+          color: topik.unlocked
               ? const Color(0xFFCD3551)
               : const Color(0xFF5D4037),
           borderRadius: BorderRadius.circular(20),
@@ -194,13 +256,13 @@ class DashboardStudentController extends GetxController {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              materi.isUnlocked ? Icons.lock_open : Icons.lock,
+              topik.unlocked ? Icons.lock_open : Icons.lock,
               color: Colors.white,
               size: 20,
             ),
             const SizedBox(width: 8),
             Text(
-              materi.title,
+              'Misi ${topik.kode}',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -213,20 +275,8 @@ class DashboardStudentController extends GetxController {
     );
   }
 
-  void openChapter(String chapter) {
-    // TODO: Navigate to chapter content
-    Get.snackbar(
-      'Info',
-      'Membuka $chapter',
-      backgroundColor: Colors.blue,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
-
-  // Cek apakah minimal satu materi sudah terbuka
-  bool hasUnlockedMaterial(String chapter) {
-    final materials = chapterMaterials[chapter] ?? [];
-    return materials.any((materi) => materi.isUnlocked);
+  Future<void> logout() async {
+    await _authService.logout();
+    Get.offAllNamed(Routes.LOGIN_STUDENT);
   }
 }
