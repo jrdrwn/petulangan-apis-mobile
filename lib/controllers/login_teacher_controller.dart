@@ -111,9 +111,6 @@ class LoginTeacherController extends GetxController {
       // Call login API
       await _authService.loginGuru(request);
 
-      // Save teacher name (NIP for now)
-      await _authService.saveName(nipController.text);
-
       Get.snackbar(
         'Berhasil',
         'Login berhasil!',

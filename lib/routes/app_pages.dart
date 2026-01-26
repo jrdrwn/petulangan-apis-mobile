@@ -11,6 +11,7 @@ import '../screens/video_material_screen.dart';
 import '../screens/quiz_screen.dart';
 import '../screens/quiz_complete_screen.dart';
 import '../screens/quiz_result_screen.dart';
+import '../controllers/splash_controller.dart';
 
 part 'app_routes.dart';
 
@@ -20,7 +21,13 @@ class AppPages {
   static const INITIAL = Routes.SPLASH;
 
   static final routes = [
-    GetPage(name: Routes.SPLASH, page: () => const SplashScreen()),
+    GetPage(
+      name: Routes.SPLASH,
+      page: () => const SplashScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<SplashController>(() => SplashController());
+      }),
+    ),
     GetPage(name: Routes.LOGIN_STUDENT, page: () => const LoginStudentScreen()),
     GetPage(
       name: Routes.REGISTER_STUDENT,

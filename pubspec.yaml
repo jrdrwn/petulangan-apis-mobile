@@ -1,5 +1,5 @@
-name: flutter_application_1
-description: "A new Flutter project."
+name: petualangan_apis
+description: "A group project application for learning purposes."
 publish_to: 'none'
 version: 0.1.0
 
@@ -16,6 +16,9 @@ dependencies:
   connectivity_plus: ^6.1.1
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
+  shared_preferences: ^2.3.3
+  flutter_launcher_icons: ^0.14.4
+  rename_app : ^1.6.5 
 
 dev_dependencies:
   flutter_test:

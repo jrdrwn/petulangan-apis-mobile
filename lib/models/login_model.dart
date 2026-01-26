@@ -13,10 +13,26 @@ class LoginRequest with _$LoginRequest {
 
 @freezed
 class LoginResponse with _$LoginResponse {
-  const factory LoginResponse({required String token}) = _LoginResponse;
+  const factory LoginResponse({
+    required String token,
+    @JsonKey(name: 'peserta_didik') required PesertaDidikData pesertaDidik,
+  }) = _LoginResponse;
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>
       _$LoginResponseFromJson(json);
+}
+
+@freezed
+class PesertaDidikData with _$PesertaDidikData {
+  const factory PesertaDidikData({
+    required int id,
+    @JsonKey(name: 'nama_lengkap') required String namaLengkap,
+    required String nisn,
+    @JsonKey(name: 'kelas_id') required int kelasId,
+  }) = _PesertaDidikData;
+
+  factory PesertaDidikData.fromJson(Map<String, dynamic> json) =>
+      _$PesertaDidikDataFromJson(json);
 }
 
 @freezed
@@ -33,8 +49,27 @@ class LoginGuruRequest with _$LoginGuruRequest {
 
 @freezed
 class LoginGuruResponse with _$LoginGuruResponse {
-  const factory LoginGuruResponse({required String token}) = _LoginGuruResponse;
+  const factory LoginGuruResponse({
+    required String token,
+    required GuruData guru,
+  }) = _LoginGuruResponse;
 
   factory LoginGuruResponse.fromJson(Map<String, dynamic> json) =>
       _$LoginGuruResponseFromJson(json);
+}
+
+@freezed
+class GuruData with _$GuruData {
+  const factory GuruData({
+    required int id,
+    @JsonKey(name: 'nama_lengkap') required String namaLengkap,
+    required String email,
+    required String nip,
+    required String password,
+    @JsonKey(name: 'no_telepon') required String noTelepon,
+    @JsonKey(name: 'sekolah_id') required int sekolahId,
+  }) = _GuruData;
+
+  factory GuruData.fromJson(Map<String, dynamic> json) =>
+      _$GuruDataFromJson(json);
 }

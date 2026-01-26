@@ -288,6 +288,6 @@ class DashboardStudentController extends GetxController {
 
   Future<void> logout() async {
     await _authService.logout();
-    Get.offAllNamed(Routes.LOGIN_STUDENT);
+    Get.offAllNamed(Routes.SPLASH);
   }
 }

@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'routes/app_pages.dart';
+import 'services/auth_service.dart';
 
 void main() {
+  // Initialize AuthService as a permanent singleton
+  Get.put(AuthService(), permanent: true);
+
   runApp(const MainApp());
 }
 

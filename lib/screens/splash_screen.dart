@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../controllers/splash_controller.dart';
 import '../routes/app_pages.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends GetView<SplashController> {
   const SplashScreen({super.key});
 
   @override
@@ -61,9 +62,7 @@ class SplashScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: ElevatedButton(
-                  onPressed: () {
-                    Get.offNamed(Routes.LOGIN_STUDENT);
-                  },
+                  onPressed: controller.onButtonPressed,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF1D4B8B),

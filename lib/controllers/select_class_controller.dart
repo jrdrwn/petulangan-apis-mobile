@@ -38,17 +38,17 @@ class SelectClassController extends GetxController {
         return;
       }
 
-      // Get sekolahId from arguments
-      final args = Get.arguments as Map<String, dynamic>?;
-      final sekolahId = args?['sekolahId'] as int?;
+      // Get sekolahId from AuthService (saved during login)
+      final sekolahId = _authService.getSekolahId();
 
       if (sekolahId == null) {
         errorMessage.value = 'Data sekolah tidak ditemukan';
         Get.snackbar(
           'Error',
-          'Data sekolah tidak ditemukan',
+          'Data sekolah tidak ditemukan. Silakan login kembali.',
           snackPosition: SnackPosition.TOP,
         );
+        Get.offAllNamed('/login-teacher');
         return;
       }
 
@@ -86,25 +86,21 @@ class SelectClassController extends GetxController {
   void selectClass(KelasModel kelas) {
     selectedClass.value = kelas;
 
-    // Get teacher info from arguments
-    final args = Get.arguments as Map<String, dynamic>?;
-    final teacherName = args?['teacherName'] as String? ?? '';
-    final school = args?['school'] as String? ?? '';
+    // Get teacher info from AuthService
+    final teacherName = _authService.getUserName() ?? '';
 
     // Navigate to student list after selecting class
     Future.delayed(const Duration(milliseconds: 300), () {
       Get.toNamed(
         '/student-list',
-        arguments: {
-          'selectedClass': kelas,
-          'teacherName': teacherName,
-          'school': school,
-        },
+        arguments: {'selectedClass': kelas, 'teacherName': teacherName},
       );
     });
   }
 
   void goBack() {
-    Get.back();
+    // Logout and return to login screen
+    _authService.logout();
+    Get.offAllNamed('/splash');
   }
 }

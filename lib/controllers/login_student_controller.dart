@@ -9,7 +9,6 @@ class LoginStudentController extends GetxController {
   late final AuthService _authService;
   final ConnectivityService _connectivityService = ConnectivityService();
 
-  final namaController = TextEditingController();
   final nisnController = TextEditingController();
 
   final isLogging = false.obs;
@@ -28,7 +27,6 @@ class LoginStudentController extends GetxController {
 
   @override
   void onClose() {
-    namaController.dispose();
     nisnController.dispose();
     super.onClose();
   }
@@ -64,12 +62,7 @@ class LoginStudentController extends GetxController {
       isLogging.value = true;
 
       final request = LoginRequest(nisn: nisnController.text.trim());
-      final response = await _authService.login(request);
-
-      // Save name (from TextField as decoration)
-      if (namaController.text.trim().isNotEmpty) {
-        await _authService.saveName(namaController.text.trim());
-      }
+      await _authService.login(request);
 
       Get.snackbar(
         'Berhasil!',

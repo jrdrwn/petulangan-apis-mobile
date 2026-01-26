@@ -62,7 +62,7 @@ class DashboardStudentScreen extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 20),
                         child: Text(
-                          'Hallo, ${controller.studentName.value}',
+                          'Halo, ${controller.studentName.value}',
                           style: GoogleFonts.montserrat(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

@@ -64,36 +64,6 @@ class LoginStudentScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      // Nama Lengkap TextField
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: TextField(
-                          controller: controller.namaController,
-                          decoration: const InputDecoration(
-                            hintText: 'Nama Lengkap',
-                            hintStyle: TextStyle(
-                              color: Color(0xFF9DB4C8),
-                              fontSize: 14,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 25,
-                              vertical: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                       // NISN TextField
                       Container(
                         decoration: BoxDecoration(
