@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'routes/app_pages.dart';
 import 'services/auth_service.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set system UI to light mode
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Transparent status bar
+      statusBarIconBrightness: Brightness.dark, // Dark icons for light background
+      statusBarBrightness: Brightness.light, // For iOS
+      systemNavigationBarColor: Colors.white, // White navigation bar
+      systemNavigationBarIconBrightness: Brightness.dark, // Dark icons for navigation bar
+    ),
+  );
+  
   // Initialize AuthService as a permanent singleton
   Get.put(AuthService(), permanent: true);
 

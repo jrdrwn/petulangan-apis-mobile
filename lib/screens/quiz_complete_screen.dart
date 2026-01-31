@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/quiz_model.dart';
-import 'quiz_result_screen.dart';
 
 class QuizCompleteScreen extends StatelessWidget {
   const QuizCompleteScreen({super.key});
@@ -14,6 +13,8 @@ class QuizCompleteScreen extends StatelessWidget {
     final materialTitle = args['materialTitle'] as String;
     final chapterName = args['chapterName'] as String;
     final topikId = args['topikId'] as int?;
+    final questions = args['questions'] as List<Question>?;
+    final userAnswers = args['userAnswers'] as List<String>?;
 
     final isPassed = result.passed;
 
@@ -122,6 +123,8 @@ class QuizCompleteScreen extends StatelessWidget {
                                           'materialTitle': materialTitle,
                                           'chapterName': chapterName,
                                           'topikId': topikId,
+                                          'questions': questions,
+                                          'userAnswers': userAnswers,
                                         },
                                       );
                                     },

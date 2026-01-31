@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/splash_controller.dart';
-import '../routes/app_pages.dart';
 
 class SplashScreen extends GetView<SplashController> {
   const SplashScreen({super.key});

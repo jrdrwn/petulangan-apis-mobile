@@ -30,10 +30,15 @@ class DashboardStudentScreen extends StatelessWidget {
                 top: 100,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Color(0xFF49D5EC),
+                    color: Color.fromARGB(187, 73, 214, 236),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(screenWidth * 0.5),
                       topRight: Radius.circular(screenWidth * 0.5),
+                    ),
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/texture_bg.jpg'),
+                      fit: BoxFit.cover,
+                      opacity: 0.25, // transparan agar tidak terlalu mencolok
                     ),
                   ),
                 ),
@@ -45,10 +50,17 @@ class DashboardStudentScreen extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(
                     Icons.logout,
-                    color: Color(0xFFCD3551),
+                    color: Colors.white,
                     size: 25,
                   ),
                   onPressed: controller.logout,
+                  style: IconButton.styleFrom(
+                    backgroundColor: Color(0xFFCD3551),
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(8),
+                    shadowColor: Colors.black.withValues(alpha: 0.2),
+                    elevation: 5,
+                  ),
                 ),
               ),
               // Main content
@@ -79,7 +91,7 @@ class DashboardStudentScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   // Logo
                   Container(
                     width: 120,
@@ -89,7 +101,7 @@ class DashboardStudentScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),

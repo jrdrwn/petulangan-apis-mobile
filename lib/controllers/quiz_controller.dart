@@ -116,6 +116,9 @@ class QuizController extends GetxController {
         return Answer(id: entry.key, text: entry.value);
       }).toList();
 
+      // Shuffle answers to randomize order
+      answers.shuffle();
+
       return Question(
         id: quiz.id.toString(),
         question: quiz.nama,
@@ -376,6 +379,8 @@ class QuizController extends GetxController {
           'materialTitle': materialTitle,
           'chapterName': chapterName,
           'topikId': topikId,
+          'questions': questions,
+          'userAnswers': userAnswers,
         },
       );
     } catch (e) {

@@ -6,7 +6,7 @@ class AppConfig {
   static const Duration apiTimeout = Duration(seconds: 30);
 
   // App Information
-  static const String appName = 'Petualangan APIS';
+  static const String appName = 'Petualangan IPAS';
   static const String appVersion = '1.0.0';
 
   // Environment

@@ -27,6 +27,7 @@ class RegisterPesertaDidikRequest with _$RegisterPesertaDidikRequest {
   factory RegisterPesertaDidikRequest.fromJson(Map<String, dynamic> json) =>
       _$RegisterPesertaDidikRequestFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => {
     'nama': nama,
     'nisn': nisn,

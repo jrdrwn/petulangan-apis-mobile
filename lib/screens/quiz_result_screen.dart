@@ -13,6 +13,8 @@ class QuizResultScreen extends StatelessWidget {
     final materialTitle = args['materialTitle'] as String;
     final chapterName = args['chapterName'] as String;
     final topikId = args['topikId'] as int?;
+    final questions = args['questions'] as List<Question>?;
+    final userAnswers = args['userAnswers'] as List<String>?;
 
     final isPassed = result.passed;
 
@@ -165,6 +167,37 @@ class QuizResultScreen extends StatelessWidget {
 
                   const SizedBox(height: 40),
 
+                  // View answers button (if data available)
+                  if (questions != null && userAnswers != null)
+                    OutlinedButton.icon(
+                      onPressed: () => _showAnswersDialog(
+                        context,
+                        questions,
+                        userAnswers,
+                      ),
+                      icon: const Icon(Icons.visibility),
+                      label: Text(
+                        'Lihat Pembahasan',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white, width: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 15,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 20),
+
                   // Action buttons
                   if (isPassed) ...[
                     // Continue button (for passed)
@@ -277,6 +310,230 @@ class QuizResultScreen extends StatelessWidget {
     );
   }
 
+  void _showAnswersDialog(
+    BuildContext context,
+    List<Question> questions,
+    List<String> userAnswers,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 600),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1565C0),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Pembahasan Jawaban',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Questions list
+              Flexible(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(20),
+                  shrinkWrap: true,
+                  itemCount: questions.length,
+                  itemBuilder: (context, index) {
+                    final question = questions[index];
+                    final userAnswer = userAnswers[index];
+                    final correctAnswer = question.correctAnswerId;
+                    final isCorrect = userAnswer == correctAnswer;
+
+                    // Find answer texts
+                    final userAnswerText = question.answers
+                        .firstWhere(
+                          (a) => a.id == userAnswer,
+                          orElse: () => Answer(id: '', text: 'Tidak dijawab'),
+                        )
+                        .text;
+
+                    final correctAnswerText = question.answers
+                        .firstWhere(
+                          (a) => a.id == correctAnswer,
+                          orElse: () => Answer(id: '', text: '-'),
+                        )
+                        .text;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: isCorrect
+                            ? Colors.green.shade50
+                            : Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: isCorrect ? Colors.green : Colors.red,
+                          width: 2,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Question number and status
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isCorrect ? Colors.green : Colors.red,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'Soal ${index + 1}',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Icon(
+                                isCorrect ? Icons.check_circle : Icons.cancel,
+                                color: isCorrect ? Colors.green : Colors.red,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                isCorrect ? 'Benar' : 'Salah',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: isCorrect ? Colors.green : Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Question text
+                          Text(
+                            question.question,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // User answer
+                          _buildAnswerRow(
+                            'Jawaban Anda',
+                            userAnswerText,
+                            isCorrect ? Colors.green : Colors.red,
+                            isCorrect
+                                ? Icons.check_circle
+                                : Icons.cancel,
+                          ),
+
+                          // Show correct answer if user was wrong
+                          if (!isCorrect) ...[
+                            const SizedBox(height: 8),
+                            _buildAnswerRow(
+                              'Jawaban Benar',
+                              correctAnswerText,
+                              Colors.green,
+                              Icons.check_circle,
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnswerRow(
+    String label,
+    String answer,
+    Color color,
+    IconData icon,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color, width: 1),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  answer,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildScoreRow(String label, String value, Color color) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -309,3 +566,4 @@ class QuizResultScreen extends StatelessWidget {
     );
   }
 }
+      

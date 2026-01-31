@@ -1,8 +1,12 @@
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoMaterialController extends GetxController {
-  late VideoPlayerController videoController;
+  VideoPlayerController? videoController;
+  YoutubePlayerController? youtubeController;
+  
+  final isYoutubeVideo = false.obs;
   final isInitialized = false.obs;
   final isPlaying = false.obs;
   final isLoading = true.obs;
@@ -26,23 +30,63 @@ class VideoMaterialController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initializeVideoPlayer();
+    initializePlayer();
+  }
+
+  Future<void> initializePlayer() async {
+    try {
+      isLoading.value = true;
+      
+      // Check if URL is YouTube
+      final videoId = YoutubePlayer.convertUrlToId(videoUrl);
+      
+      if (videoId != null) {
+        // It's a YouTube video
+        isYoutubeVideo.value = true;
+        youtubeController = YoutubePlayerController(
+          initialVideoId: videoId,
+          flags: const YoutubePlayerFlags(
+            autoPlay: false,
+            mute: false,
+            enableCaption: false,
+            controlsVisibleAtStart: true,
+            hideControls: false,
+            disableDragSeek: false,
+            loop: false,
+            forceHD: false,
+            showLiveFullscreenButton: true
+          ),
+        );
+        isInitialized.value = true;
+        isLoading.value = false;
+      } else {
+        // It's a regular video URL
+        isYoutubeVideo.value = false;
+        await initializeVideoPlayer();
+      }
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar(
+        'Error',
+        'Gagal memuat video: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   Future<void> initializeVideoPlayer() async {
     try {
-      isLoading.value = true;
       videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
 
-      await videoController.initialize();
+      await videoController!.initialize();
       isInitialized.value = true;
       isLoading.value = false;
-      totalDuration.value = videoController.value.duration;
+      totalDuration.value = videoController!.value.duration;
 
       // Listen to video player state changes
-      videoController.addListener(() {
-        isPlaying.value = videoController.value.isPlaying;
-        currentPosition.value = videoController.value.position;
+      videoController!.addListener(() {
+        isPlaying.value = videoController!.value.isPlaying;
+        currentPosition.value = videoController!.value.position;
       });
     } catch (e) {
       isLoading.value = false;
@@ -55,32 +99,47 @@ class VideoMaterialController extends GetxController {
   }
 
   void togglePlayPause() {
-    if (videoController.value.isPlaying) {
-      videoController.pause();
+    if (isYoutubeVideo.value) {
+      // YouTube player iframe handles its own play/pause through UI
+      // No need for manual control
     } else {
-      videoController.play();
+      if (videoController?.value.isPlaying ?? false) {
+        videoController?.pause();
+      } else {
+        videoController?.play();
+      }
     }
   }
 
   void seekTo(Duration position) {
-    videoController.seekTo(position);
+    if (!isYoutubeVideo.value) {
+      videoController?.seekTo(position);
+    }
   }
 
   void skipForward() {
+    if (isYoutubeVideo.value) {
+      // YouTube player handles this internally
+      return;
+    }
     final newPosition = currentPosition.value + const Duration(seconds: 10);
     if (newPosition < totalDuration.value) {
-      videoController.seekTo(newPosition);
+      videoController?.seekTo(newPosition);
     } else {
-      videoController.seekTo(totalDuration.value);
+      videoController?.seekTo(totalDuration.value);
     }
   }
 
   void skipBackward() {
+    if (isYoutubeVideo.value) {
+      // YouTube player handles this internally
+      return;
+    }
     final newPosition = currentPosition.value - const Duration(seconds: 10);
     if (newPosition > Duration.zero) {
-      videoController.seekTo(newPosition);
+      videoController?.seekTo(newPosition);
     } else {
-      videoController.seekTo(Duration.zero);
+      videoController?.seekTo(Duration.zero);
     }
   }
 
@@ -119,7 +178,7 @@ class VideoMaterialController extends GetxController {
 
   @override
   void onClose() {
-    videoController.dispose();
+    videoController?.dispose();
     super.onClose();
   }
 }
