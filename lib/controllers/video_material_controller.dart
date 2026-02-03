@@ -14,6 +14,7 @@ class VideoMaterialController extends GetxController {
   final totalDuration = Duration.zero.obs;
   final showControls = true.obs;
   final isFullscreen = false.obs;
+  final isVideoCompleted = false.obs; // Track if video is completed
 
   final int topikId;
   final String videoUrl;
@@ -57,6 +58,21 @@ class VideoMaterialController extends GetxController {
             showLiveFullscreenButton: true
           ),
         );
+        
+        // Listen to YouTube player state
+        youtubeController!.addListener(() {
+          if (youtubeController!.value.playerState == PlayerState.ended) {
+            isVideoCompleted.value = true;
+          }
+          // Also check if video is near end (95% watched)
+          final position = youtubeController!.value.position;
+          final duration = youtubeController!.metadata.duration;
+          if (duration.inSeconds > 0 && 
+              position.inSeconds >= (duration.inSeconds * 0.95)) {
+            isVideoCompleted.value = true;
+          }
+        });
+        
         isInitialized.value = true;
         isLoading.value = false;
       } else {
@@ -87,6 +103,12 @@ class VideoMaterialController extends GetxController {
       videoController!.addListener(() {
         isPlaying.value = videoController!.value.isPlaying;
         currentPosition.value = videoController!.value.position;
+        
+        // Check if video is completed (95% watched)
+        if (totalDuration.value.inSeconds > 0 &&
+            currentPosition.value.inSeconds >= (totalDuration.value.inSeconds * 0.95)) {
+          isVideoCompleted.value = true;
+        }
       });
     } catch (e) {
       isLoading.value = false;

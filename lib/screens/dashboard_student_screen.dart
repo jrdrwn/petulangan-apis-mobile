@@ -43,7 +43,7 @@ class DashboardStudentScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              // Back button
+              // Logout button
               Positioned(
                 top: 10,
                 left: 10,
@@ -63,35 +63,16 @@ class DashboardStudentScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              // Profile dropdown button
+              Positioned(
+                top: 10,
+                right: 10,
+                child: _buildProfileDropdown(controller),
+              ),
               // Main content
               Column(
                 children: [
-                  const SizedBox(height: 20),
-                  // Welcome message
-                  Obx(
-                    () => Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 20),
-                        child: Text(
-                          'Halo, ${controller.studentName.value}',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(1, 1),
-                                blurRadius: 3,
-                                color: Colors.black26,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 60),
                   // Logo
                   Container(
                     width: 120,
@@ -256,6 +237,188 @@ class DashboardStudentScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileDropdown(DashboardStudentController controller) {
+    return PopupMenuButton<String>(
+      offset: const Offset(0, 50),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: Colors.white,
+      elevation: 8,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1565C0),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircleAvatar(
+              radius: 14,
+              backgroundColor: Colors.white,
+              child: Icon(
+                Icons.person,
+                size: 18,
+                color: Color(0xFF1565C0),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Obx(
+              () => Text(
+                controller.studentName.value.split(' ').first,
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.arrow_drop_down,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+      itemBuilder: (context) => [
+        // Profile header
+        PopupMenuItem<String>(
+          enabled: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Obx(
+                () => Text(
+                  controller.studentName.value,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Peserta Didik',
+                style: GoogleFonts.montserrat(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        // Progress section
+        PopupMenuItem<String>(
+          enabled: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Progress Belajar',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Obx(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: controller.progressPercentage,
+                        minHeight: 12,
+                        backgroundColor: Colors.grey.shade300,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          controller.progressPercentage >= 1.0
+                              ? Colors.green
+                              : const Color(0xFF1565C0),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          controller.progressText,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        Text(
+                          '${(controller.progressPercentage * 100).toInt()}%',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: controller.progressPercentage >= 1.0
+                                ? Colors.green
+                                : const Color(0xFF1565C0),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        // Download report
+        PopupMenuItem<String>(
+          value: 'download',
+          child: Obx(
+            () => Row(
+              children: [
+                controller.isDownloadingReport.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(
+                        Icons.download,
+                        color: Color(0xFF1565C0),
+                      ),
+                const SizedBox(width: 12),
+                Text(
+                  controller.isDownloadingReport.value
+                      ? 'Mengunduh...'
+                      : 'Download Laporan',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+      onSelected: (value) {
+        if (value == 'download') {
+          controller.downloadLaporan();
+        }
+      },
     );
   }
 }

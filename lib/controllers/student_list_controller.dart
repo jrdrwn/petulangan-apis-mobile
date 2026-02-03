@@ -1,11 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
 import '../models/student_model.dart';
 import '../models/kelas_model.dart';
 import '../models/peserta_didik_guru_model.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/connectivity_service.dart';
+import '../config/app_config.dart';
 
 class StudentListController extends GetxController {
   final _apiService = ApiService();
@@ -144,15 +149,98 @@ class StudentListController extends GetxController {
     );
   }
 
-  void printStudentData(PesertaDidikGuruModel student) {
-    // TODO: Implement print functionality
-    Get.snackbar(
-      'Print',
-      'Mencetak data ${student.namaLengkap}...',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF1565C0),
-      colorText: Colors.white,
-    );
+  void printStudentData(PesertaDidikGuruModel student) async {
+    try {
+      // Show loading dialog
+      Get.dialog(
+        const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Mengunduh laporan...'),
+                ],
+              ),
+            ),
+          ),
+        ),
+        barrierDismissible: false,
+      );
+
+      final token = _authService.token.value;
+      if (token == null) {
+        Get.back();
+        Get.snackbar(
+          'Error',
+          'Token tidak ditemukan. Silakan login kembali.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Download PDF from API
+      final url = Uri.parse(
+        '${AppConfig.apiBaseUrl}/guru/laporan-pdf/${student.id}',
+      );
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Get download directory
+        final directory = await getApplicationDocumentsDirectory();
+        final fileName = 'Laporan_${student.namaLengkap.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final filePath = '${directory.path}/$fileName';
+
+        // Save file
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        Get.back(); // Close loading dialog
+
+        // Open the PDF file
+        final result = await OpenFilex.open(filePath);
+        
+        if (result.type != ResultType.done) {
+          Get.snackbar(
+            'Info',
+            'File disimpan di: $filePath',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF1565C0),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 5),
+          );
+        }
+      } else {
+        Get.back(); // Close loading dialog
+        Get.snackbar(
+          'Error',
+          'Gagal mengunduh laporan. Status: ${response.statusCode}',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.back(); // Close loading dialog
+      Get.snackbar(
+        'Error',
+        'Gagal mengunduh laporan: ${e.toString()}',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   void goBack() {

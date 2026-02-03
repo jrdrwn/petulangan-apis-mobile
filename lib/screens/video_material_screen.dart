@@ -128,6 +128,8 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen> {
                           }),
                           const SizedBox(height: 40),
                           _buildStartButton(controller),
+                          const SizedBox(height: 15),
+                          _buildDescription(),
                           const SizedBox(height: 20),
                           _buildCharacterImage(),
                           const SizedBox(height: 20),
@@ -186,6 +188,8 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen> {
                         }),
                         const SizedBox(height: 40),
                         _buildStartButton(controller),
+                        const SizedBox(height: 15),
+                        _buildDescription(),
                         const SizedBox(height: 20),
                         _buildCharacterImage(),
                         const SizedBox(height: 20),
@@ -463,26 +467,132 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen> {
   }
 
   Widget _buildStartButton(VideoMaterialController controller) {
-    return ElevatedButton(
-      onPressed: controller.startMission,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFEF4444),
-        padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+    return Obx(() {
+      final isEnabled = controller.isVideoCompleted.value;
+      return ElevatedButton(
+        onPressed: isEnabled
+            ? () => _showStartMissionDialog(controller)
+            : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isEnabled
+              ? const Color(0xFFEF4444)
+              : Colors.grey.shade400,
+          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+            side: BorderSide(
+              color: isEnabled ? Colors.white : Colors.grey.shade300,
+              width: 3,
+            ),
+          ),
+          elevation: isEnabled ? 5 : 0,
+        ),
+        child: Text(
+          'Mulai Misi',
+          style: GoogleFonts.montserrat(
+            fontSize: 22,
+            fontWeight: FontWeight.w900,
+            color: isEnabled ? Colors.white : Colors.grey.shade600,
+          ),
+        ),
+      );
+    });
+  }
+
+  void _showStartMissionDialog(VideoMaterialController controller) {
+    Get.dialog(
+      AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-          side: const BorderSide(color: Colors.white, width: 3),
+          borderRadius: BorderRadius.circular(20),
         ),
-        elevation: 5,
-      ),
-      child: Text(
-        'Mulai Misi',
-        style: GoogleFonts.montserrat(
-          fontSize: 22,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
+        title: Text(
+          'Siap Memulai Misi?',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.montserrat(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.rocket_launch,
+              size: 60,
+              color: Colors.orange.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Kamu akan memulai kuis untuk menguji pemahamanmu. Pastikan kamu sudah siap!',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.montserrat(
+                fontSize: 14,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Belum Siap',
+              style: GoogleFonts.montserrat(
+                color: Colors.grey,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              controller.startMission();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: Text(
+              'Mulai!',
+              style: GoogleFonts.montserrat(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildDescription() {
+    return Obx(() {
+      final controller = Get.find<VideoMaterialController>();
+      if (controller.isVideoCompleted.value) {
+        return Text(
+          'Video selesai! Kamu siap untuk memulai misi.',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.montserrat(
+            fontSize: 12,
+            color: Colors.greenAccent.shade200,
+            fontWeight: FontWeight.w500,
+          ),
+        );
+      }
+      return Text(
+        'Tonton video sampai selesai untuk membuka tombol Mulai Misi',
+        textAlign: TextAlign.center,
+        style: GoogleFonts.montserrat(
+          fontSize: 12,
+          color: Colors.white70,
+          fontWeight: FontWeight.w500,
+        ),
+      );
+    });
   }
 
   Widget _buildCharacterImage() {

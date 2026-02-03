@@ -1,6 +1,7 @@
 class AppConfig {
   // API Configuration
   static const String apiBaseUrl = 'https://petualangan-apis-be.vercel.app';
+  // static const String apiBaseUrl = 'http://localhost:3000';
 
   // Timeout Configuration
   static const Duration apiTimeout = Duration(seconds: 30);

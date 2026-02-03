@@ -1,11 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
 import '../routes/app_pages.dart';
 import '../models/bab_model.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/connectivity_service.dart';
+import '../config/app_config.dart';
 
 class DashboardStudentController extends GetxController {
   final ApiService _apiService = ApiService();
@@ -15,6 +20,38 @@ class DashboardStudentController extends GetxController {
   final studentName = ''.obs;
   final babList = <BabModel>[].obs;
   final isLoadingBab = false.obs;
+  final isDownloadingReport = false.obs;
+
+  // Progress tracking
+  int get totalTopik {
+    int count = 0;
+    for (var bab in babList) {
+      count += bab.topik.length;
+    }
+    return count;
+  }
+
+  int get completedTopik {
+    int count = 0;
+    for (var bab in babList) {
+      // Count topik that are completed (next one is unlocked or it's the last unlocked)
+      for (int i = 0; i < bab.topik.length; i++) {
+        if (i < bab.topik.length - 1 && bab.topik[i + 1].unlocked) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  double get progressPercentage {
+    if (totalTopik == 0) return 0;
+    return completedTopik / totalTopik;
+  }
+
+  String get progressText {
+    return '$completedTopik / $totalTopik Misi Selesai';
+  }
 
   @override
   void onInit() {
@@ -289,5 +326,78 @@ class DashboardStudentController extends GetxController {
   Future<void> logout() async {
     await _authService.logout();
     Get.offAllNamed(Routes.SPLASH);
+  }
+
+  Future<void> downloadLaporan() async {
+    try {
+      isDownloadingReport.value = true;
+
+      final token = _authService.getToken();
+      if (token == null) {
+        Get.snackbar(
+          'Error',
+          'Token tidak ditemukan. Silakan login kembali.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Download PDF from API
+      final url = Uri.parse(
+        '${AppConfig.apiBaseUrl}/peserta-didik/laporan-pdf',
+      );
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Get download directory
+        final directory = await getApplicationDocumentsDirectory();
+        final fileName = 'Laporan_${studentName.value.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final filePath = '${directory.path}/$fileName';
+
+        // Save file
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        // Open the PDF file
+        final result = await OpenFilex.open(filePath);
+
+        if (result.type != ResultType.done) {
+          Get.snackbar(
+            'Berhasil',
+            'File disimpan di: $filePath',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 5),
+          );
+        }
+      } else {
+        Get.snackbar(
+          'Error',
+          'Gagal mengunduh laporan. Status: ${response.statusCode}',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal mengunduh laporan: ${e.toString()}',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isDownloadingReport.value = false;
+    }
   }
 }
