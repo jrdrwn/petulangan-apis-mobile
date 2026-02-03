@@ -3,8 +3,71 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/login_student_controller.dart';
 
-class LoginStudentScreen extends StatelessWidget {
+class LoginStudentScreen extends StatefulWidget {
   const LoginStudentScreen({super.key});
+
+  @override
+  State<LoginStudentScreen> createState() => _LoginStudentScreenState();
+}
+
+class _LoginStudentScreenState extends State<LoginStudentScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _logoAnimation;
+  late Animation<Offset> _titleSlide;
+  late Animation<Offset> _formSlide;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _logoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.0, 0.4, curve: Curves.elasticOut),
+      ),
+    );
+
+    _titleSlide = Tween<Offset>(
+      begin: const Offset(0, -0.5),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.2, 0.5, curve: Curves.easeOut),
+      ),
+    );
+
+    _formSlide = Tween<Offset>(
+      begin: const Offset(0, 0.5),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.3, 0.7, curve: Curves.easeOut),
+      ),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+      ),
+    );
+
+    _animController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,86 +96,116 @@ class LoginStudentScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       const SizedBox(height: 80),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
+                      // Animated Logo
+                      ScaleTransition(
+                        scale: _logoAnimation,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Image(
+                              width: 225,
+                              height: 225,
+                              image: AssetImage('assets/images/logo.png'),
+                              fit: BoxFit.cover,
                             ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: Image(
-                            width: 225,
-                            height: 225,
-                            image: AssetImage('assets/images/logo.png'),
-                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
                       const SizedBox(height: 30),
-                      Text(
-                        'LOGIN PESERTA DIDIK',
-                        style: GoogleFonts.montserrat(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1565C0),
+                      // Animated Title
+                      SlideTransition(
+                        position: _titleSlide,
+                        child: FadeTransition(
+                          opacity: _logoAnimation,
+                          child: Text(
+                            'LOGIN PESERTA DIDIK',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1565C0),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 30),
-                      // NISN TextField
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
+                      // Animated Form
+                      SlideTransition(
+                        position: _formSlide,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: TextField(
-                          controller: controller.nisnController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            hintText: 'NISN (Nomor Induk Siswa Nasional)',
-                            hintStyle: TextStyle(
-                              color: Color(0xFF9DB4C8),
-                              fontSize: 14,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 25,
-                              vertical: 18,
+                            child: TextField(
+                              controller: controller.nisnController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                hintText: 'NISN (Nomor Induk Siswa Nasional)',
+                                hintStyle: TextStyle(
+                                  color: Color(0xFF9DB4C8),
+                                  fontSize: 14,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 25,
+                                  vertical: 18,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.badge_outlined,
+                                  color: Color(0xFF1565C0),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 15),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: controller.goToRegister,
-                          child: Text(
-                            'Belum Terdaftar',
-                            style: GoogleFonts.montserrat(
-                              color: Color(0xFF1565C0),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.underline,
-                              decorationColor: Color(0xFF1565C0),
+                      // Animated register link
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: controller.goToRegister,
+                            child: Text(
+                              'Belum Terdaftar',
+                              style: GoogleFonts.montserrat(
+                                color: const Color(0xFF1565C0),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                                decorationColor: const Color(0xFF1565C0),
+                              ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      Obx(
+                      // Animated Button
+                      SlideTransition(
+                        position: _formSlide,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Obx(
                         () => ElevatedButton(
                           onPressed: controller.isLogging.value
                               ? null
@@ -123,6 +216,7 @@ class LoginStudentScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
+                              side: const BorderSide(color: Colors.white, width: 2),
                             ),
                             minimumSize: const Size(double.infinity, 56),
                             elevation: 5,
@@ -151,6 +245,7 @@ class LoginStudentScreen extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ],
@@ -162,6 +257,8 @@ class LoginStudentScreen extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                        ),
+                      ),
                         ),
                       ),
                       const Spacer(),

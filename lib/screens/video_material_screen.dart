@@ -13,9 +13,28 @@ class VideoMaterialScreen extends StatefulWidget {
   State<VideoMaterialScreen> createState() => _VideoMaterialScreenState();
 }
 
-class _VideoMaterialScreenState extends State<VideoMaterialScreen> {
+class _VideoMaterialScreenState extends State<VideoMaterialScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _characterController;
+  late Animation<double> _characterBounce;
+
+  @override
+  void initState() {
+    super.initState();
+    // Character floating animation
+    _characterController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _characterBounce = Tween<double>(begin: 0, end: 15).animate(
+      CurvedAnimation(parent: _characterController, curve: Curves.easeInOut),
+    );
+    _characterController.repeat(reverse: true);
+  }
+
   @override
   void dispose() {
+    _characterController.dispose();
     // Reset orientation to portrait when leaving screen
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -80,6 +99,14 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen> {
           playedColor: Colors.red,
           handleColor: Colors.redAccent,
         ),
+        bottomActions: [
+          CurrentPosition(),
+          const SizedBox(width: 10),
+          ProgressBar(isExpanded: true),
+          const SizedBox(width: 10),
+          RemainingDuration(),
+          FullScreenButton(),
+        ],
       ),
       builder: (context, player) {
         return Scaffold(
@@ -132,7 +159,6 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen> {
                           _buildDescription(),
                           const SizedBox(height: 20),
                           _buildCharacterImage(),
-                          const SizedBox(height: 20),
                         ],
                       ),
                     ),
@@ -469,102 +495,197 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen> {
   Widget _buildStartButton(VideoMaterialController controller) {
     return Obx(() {
       final isEnabled = controller.isVideoCompleted.value;
-      return ElevatedButton(
-        onPressed: isEnabled
-            ? () => _showStartMissionDialog(controller)
-            : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isEnabled
-              ? const Color(0xFFEF4444)
-              : Colors.grey.shade400,
-          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            side: BorderSide(
-              color: isEnabled ? Colors.white : Colors.grey.shade300,
-              width: 3,
-            ),
+      final progress = controller.videoProgress.value;
+      final progressPercent = (progress * 100).toInt();
+      
+      return Column(
+        children: [
+          // Button with progress
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // Background button
+              Container(
+                width: 280,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: isEnabled ? Colors.white : Colors.grey.shade400,
+                    width: 3,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(27),
+                  child: Stack(
+                    children: [
+                      // Progress fill
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: 274 * progress,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isEnabled
+                                ? [const Color(0xFFEF4444), const Color(0xFFDC2626)]
+                                : [Colors.orange.shade300, Colors.orange.shade400],
+                          ),
+                        ),
+                      ),
+                      // Button content
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: isEnabled
+                              ? () => _showStartMissionDialog(controller)
+                              : null,
+                          borderRadius: BorderRadius.circular(27),
+                          child: Container(
+                            width: 274,
+                            height: 54,
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Lock/Unlock icon
+                                Icon(
+                                  isEnabled ? Icons.lock_open : Icons.lock,
+                                  color: isEnabled ? Colors.white : Colors.grey.shade600,
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 10),
+                                // Button text with progress
+                                Text(
+                                  isEnabled ? 'Mulai Misi' : 'Mulai Misi ($progressPercent%)',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: isEnabled ? Colors.white : Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          elevation: isEnabled ? 5 : 0,
-        ),
-        child: Text(
-          'Mulai Misi',
-          style: GoogleFonts.montserrat(
-            fontSize: 22,
-            fontWeight: FontWeight.w900,
-            color: isEnabled ? Colors.white : Colors.grey.shade600,
-          ),
-        ),
+        ],
       );
     });
   }
 
   void _showStartMissionDialog(VideoMaterialController controller) {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text(
-          'Siap Memulai Misi?',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+      TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.elasticOut,
+        builder: (context, value, child) {
+          return Transform.scale(
+            scale: value,
+            child: child,
+          );
+        },
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.rocket_launch,
-              size: 60,
-              color: Colors.orange.shade400,
+          title: Text(
+            'Siap Memulai Misi?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.montserrat(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Kamu akan memulai kuis untuk menguji pemahamanmu. Pastikan kamu sudah siap!',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.montserrat(
-                fontSize: 14,
-                color: Colors.grey.shade700,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.bounceOut,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Transform.rotate(
+                      angle: (1 - value) * 0.5,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Icon(
+                  Icons.rocket_launch,
+                  size: 60,
+                  color: Colors.orange.shade400,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Kamu akan memulai kuis untuk menguji pemahamanmu. Pastikan kamu sudah siap!',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                'Belum Siap',
+                style: GoogleFonts.montserrat(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 1.0, end: 1.05),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeInOut,
+              builder: (context, value, child) {
+                return Transform.scale(scale: value, child: child);
+              },
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.back();
+                  controller.startMission();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Mulai!',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                  ],
+                ),
               ),
             ),
           ],
         ),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'Belum Siap',
-              style: GoogleFonts.montserrat(
-                color: Colors.grey,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              controller.startMission();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: Text(
-              'Mulai!',
-              style: GoogleFonts.montserrat(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -572,45 +693,110 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen> {
   Widget _buildDescription() {
     return Obx(() {
       final controller = Get.find<VideoMaterialController>();
-      if (controller.isVideoCompleted.value) {
-        return Text(
-          'Video selesai! Kamu siap untuk memulai misi.',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.montserrat(
-            fontSize: 12,
-            color: Colors.greenAccent.shade200,
-            fontWeight: FontWeight.w500,
-          ),
-        );
-      }
-      return Text(
-        'Tonton video sampai selesai untuk membuka tombol Mulai Misi',
-        textAlign: TextAlign.center,
-        style: GoogleFonts.montserrat(
-          fontSize: 12,
-          color: Colors.white70,
-          fontWeight: FontWeight.w500,
-        ),
+      final isCompleted = controller.isVideoCompleted.value;
+      
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.2),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        child: isCompleted
+            ? Row(
+                key: const ValueKey('completed'),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.greenAccent.shade400,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Video selesai! Kamu siap untuk memulai misi.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12,
+                      color: Colors.greenAccent.shade200,
+                      fontWeight: FontWeight.w600,
+                      shadows: [
+                        const Shadow(
+                          blurRadius: 4,
+                          color: Colors.black45,
+                          offset: Offset(1, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                key: const ValueKey('watching'),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.play_circle_outline,
+                    color: Colors.white70,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      'Tonton video sampai selesai untuk membuka tombol Mulai Misi',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500,
+                        shadows: [
+                          const Shadow(
+                            blurRadius: 4,
+                            color: Colors.black45,
+                            offset: Offset(1, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       );
     });
   }
 
   Widget _buildCharacterImage() {
-    return Image.asset(
-      'assets/images/ivideo.png',
-      height: 250,
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          height: 250,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.person,
-            size: 250,
-            color: Colors.white.withValues(alpha: 0.5),
-          ),
+    return AnimatedBuilder(
+      animation: _characterController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, -_characterBounce.value),
+          child: child,
         );
       },
+      child: Image.asset(
+        'assets/images/ivideo.png',
+        height: 250,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: 250,
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.person,
+              size: 250,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+          );
+        },
+      ),
     );
   }
 }

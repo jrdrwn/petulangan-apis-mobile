@@ -4,8 +4,67 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/student_detail_controller.dart';
 import '../services/auth_service.dart';
 
-class StudentDetailScreen extends StatelessWidget {
+class StudentDetailScreen extends StatefulWidget {
   const StudentDetailScreen({super.key});
+
+  @override
+  State<StudentDetailScreen> createState() => _StudentDetailScreenState();
+}
+
+class _StudentDetailScreenState extends State<StudentDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _cardScale;
+  late Animation<Offset> _cardSlide;
+  late Animation<double> _headerFade;
+  late Animation<double> _contentFade;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _cardScale = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _cardSlide = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+          ),
+        );
+
+    _headerFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
+      ),
+    );
+
+    _contentFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +106,7 @@ class StudentDetailScreen extends StatelessWidget {
               ),
 
               // Profile dropdown at top right
-              Positioned(
-                top: 16,
-                right: 16,
-                child: _buildProfileDropdown(),
-              ),
+              Positioned(top: 16, right: 16, child: _buildProfileDropdown()),
 
               // Main content
               Center(
@@ -59,244 +114,286 @@ class StudentDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
                   child: Obx(() {
                     if (controller.isLoading.value) {
-                      return Container(
-                        constraints: const BoxConstraints(maxWidth: 450),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
+                      return SlideTransition(
+                        position: _cardSlide,
+                        child: ScaleTransition(
+                          scale: _cardScale,
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 450),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
                             ),
-                          ],
+                            padding: const EdgeInsets.all(50),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
                         ),
-                        padding: const EdgeInsets.all(50),
-                        child: const Center(child: CircularProgressIndicator()),
                       );
                     }
 
                     if (controller.errorMessage.isNotEmpty) {
-                      return Container(
-                        constraints: const BoxConstraints(maxWidth: 450),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
+                      return SlideTransition(
+                        position: _cardSlide,
+                        child: ScaleTransition(
+                          scale: _cardScale,
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 450),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(25),
-                        child: Column(
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              size: 60,
-                              color: Colors.red,
+                            padding: const EdgeInsets.all(25),
+                            child: Column(
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 60,
+                                  color: Colors.red,
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  'Error: ${controller.errorMessage.value}',
+                                  style: const TextStyle(color: Colors.red),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  onPressed: controller.goBack,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Kembali'),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'Error: ${controller.errorMessage.value}',
-                              style: const TextStyle(color: Colors.red),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: controller.goBack,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Kembali'),
-                            ),
-                          ],
+                          ),
                         ),
                       );
                     }
 
                     if (controller.nilaiData.isEmpty) {
-                      return Container(
-                        constraints: const BoxConstraints(maxWidth: 450),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
+                      return SlideTransition(
+                        position: _cardSlide,
+                        child: ScaleTransition(
+                          scale: _cardScale,
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 450),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(25),
-                        child: Column(
-                          children: [
-                            Text(
-                              controller.name.toUpperCase(),
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                color: const Color(0xFF1D4B8B),
-                                letterSpacing: 0.5,
-                              ),
+                            padding: const EdgeInsets.all(25),
+                            child: Column(
+                              children: [
+                                FadeTransition(
+                                  opacity: _headerFade,
+                                  child: Text(
+                                    controller.name.toUpperCase(),
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                      color: const Color(0xFF1D4B8B),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                FadeTransition(
+                                  opacity: _headerFade,
+                                  child: Text(
+                                    controller.nisn,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1D4B8B),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 25),
+                                const Text(
+                                  'Belum ada data nilai',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  onPressed: controller.goBack,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Kembali'),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 5),
-                            Text(
-                              controller.nisn,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1D4B8B),
-                              ),
-                            ),
-                            const SizedBox(height: 25),
-                            const Text(
-                              'Belum ada data nilai',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: controller.goBack,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Kembali'),
-                            ),
-                          ],
+                          ),
                         ),
                       );
                     }
 
-                    return Container(
-                      constraints: const BoxConstraints(maxWidth: 450),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
+                    return SlideTransition(
+                      position: _cardSlide,
+                      child: ScaleTransition(
+                        scale: _cardScale,
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 450),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(25),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Student Info Header
-                          Text(
-                            controller.name.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.montserrat(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              color: const Color(0xFF1D4B8B),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            controller.nisn,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.montserrat(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF1D4B8B),
-                            ),
-                          ),
+                          padding: const EdgeInsets.all(25),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Student Info Header with animation
+                              FadeTransition(
+                                opacity: _headerFade,
+                                child: Text(
+                                  controller.name.toUpperCase(),
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w900,
+                                    color: const Color(0xFF1D4B8B),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              FadeTransition(
+                                opacity: _headerFade,
+                                child: Text(
+                                  controller.nisn,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1D4B8B),
+                                  ),
+                                ),
+                              ),
 
-                          const SizedBox(height: 25),
+                              const SizedBox(height: 25),
 
-                          // Progress Content with horizontal scroll
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Container(
-                              constraints: const BoxConstraints(minWidth: 400),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Header row
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                      horizontal: 15,
+                              // Progress Content with horizontal scroll - animated
+                              FadeTransition(
+                                opacity: _contentFade,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Container(
+                                    constraints: const BoxConstraints(
+                                      minWidth: 400,
                                     ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF1565C0),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Row(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        SizedBox(
-                                          width: 220,
-                                          child: _buildHeaderText(
-                                            'Materi Petualangan',
+                                        // Header row
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                            horizontal: 15,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF1565C0),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 220,
+                                                child: _buildHeaderText(
+                                                  'Materi Petualangan',
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 120,
+                                                child: _buildHeaderText(
+                                                  'Status',
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 80,
+                                                child: Center(
+                                                  child: _buildHeaderText(
+                                                    'Nilai',
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        SizedBox(
-                                          width: 120,
-                                          child: _buildHeaderText('Status'),
-                                        ),
-                                        SizedBox(
-                                          width: 80,
-                                          child: Center(
-                                            child: _buildHeaderText('Nilai'),
-                                          ),
-                                        ),
+
+                                        const SizedBox(height: 15),
+
+                                        // Chapter list from API with staggered animation
+                                        ...controller.nilaiData
+                                            .asMap()
+                                            .entries
+                                            .map((entry) {
+                                              final index = entry.key;
+                                              final bab = entry.value;
+                                              return _AnimatedChapterRow(
+                                                index: index,
+                                                animationController:
+                                                    _animationController,
+                                                child: _buildCollapsibleChapter(
+                                                  bab,
+                                                  controller,
+                                                ),
+                                              );
+                                            }),
                                       ],
                                     ),
                                   ),
-
-                                  const SizedBox(height: 15),
-
-                                  // Chapter list from API
-                                  ...controller.nilaiData.map((bab) {
-                                    return _buildCollapsibleChapter(
-                                      bab,
-                                      controller,
-                                    );
-                                  }).toList(),
-                                ],
+                                ),
                               ),
-                            ),
+
+                              const SizedBox(height: 25),
+
+                              // Kembali button with animation
+                              _AnimatedBackButton(
+                                animationController: _animationController,
+                                onPressed: controller.goBack,
+                              ),
+                            ],
                           ),
-
-                          const SizedBox(height: 25),
-
-                          // Kembali button
-                          ElevatedButton(
-                            onPressed: controller.goBack,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 50,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              elevation: 5,
-                            ),
-                            child: Text(
-                              'Kembali',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     );
                   }),
@@ -320,7 +417,10 @@ class StudentDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCollapsibleChapter(bab, controller) {
+  Widget _buildCollapsibleChapter(
+    dynamic bab,
+    StudentDetailController controller,
+  ) {
     return Obx(() {
       final isExpanded = controller.isChapterExpanded(bab.id);
 
@@ -480,7 +580,7 @@ class StudentDetailScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildTopicRow(topik) {
+  Widget _buildTopicRow(dynamic topik) {
     // Calculate stars based on score (0-100 scale to 0-3 stars)
     int stars = 0;
     if (topik.nilaiQuiz != null) {
@@ -645,7 +745,11 @@ class StudentDetailScreen extends StatelessWidget {
                       color: Color(0xFF1D4B8B),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.person, color: Colors.white, size: 24),
+                    child: const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -734,6 +838,122 @@ class StudentDetailScreen extends StatelessWidget {
             child: Text('Keluar', style: GoogleFonts.montserrat()),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Animated chapter row widget with staggered animation
+class _AnimatedChapterRow extends StatelessWidget {
+  final int index;
+  final AnimationController animationController;
+  final Widget child;
+
+  const _AnimatedChapterRow({
+    required this.index,
+    required this.animationController,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Stagger animation based on index
+    final startDelay = 0.4 + (index * 0.05).clamp(0.0, 0.4);
+    final endDelay = (startDelay + 0.3).clamp(0.0, 1.0);
+
+    final slideAnimation =
+        Tween<Offset>(begin: const Offset(0.2, 0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: animationController,
+            curve: Interval(startDelay, endDelay, curve: Curves.easeOut),
+          ),
+        );
+
+    final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: animationController,
+        curve: Interval(startDelay, endDelay, curve: Curves.easeOut),
+      ),
+    );
+
+    return FadeTransition(
+      opacity: fadeAnimation,
+      child: SlideTransition(position: slideAnimation, child: child),
+    );
+  }
+}
+
+// Animated back button widget
+class _AnimatedBackButton extends StatefulWidget {
+  final AnimationController animationController;
+  final VoidCallback onPressed;
+
+  const _AnimatedBackButton({
+    required this.animationController,
+    required this.onPressed,
+  });
+
+  @override
+  State<_AnimatedBackButton> createState() => _AnimatedBackButtonState();
+}
+
+class _AnimatedBackButtonState extends State<_AnimatedBackButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: widget.animationController,
+        curve: const Interval(0.6, 1.0, curve: Curves.elasticOut),
+      ),
+    );
+
+    final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: widget.animationController,
+        curve: const Interval(0.6, 0.9, curve: Curves.easeOut),
+      ),
+    );
+
+    return FadeTransition(
+      opacity: fadeAnimation,
+      child: ScaleTransition(
+        scale: scaleAnimation,
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) {
+            setState(() => _isPressed = false);
+            widget.onPressed();
+          },
+          onTapCancel: () => setState(() => _isPressed = false),
+          child: AnimatedScale(
+            scale: _isPressed ? 0.95 : 1.0,
+            duration: const Duration(milliseconds: 100),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Text(
+                'Kembali',
+                style: GoogleFonts.montserrat(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

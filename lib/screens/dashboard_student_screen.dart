@@ -30,15 +30,15 @@ class DashboardStudentScreen extends StatelessWidget {
                 top: 100,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(187, 73, 214, 236),
+                    color: Color.fromARGB(184, 73, 217, 236),
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(screenWidth * 0.5),
-                      topRight: Radius.circular(screenWidth * 0.5),
+                      topLeft: Radius.circular(screenWidth * 0.6),
+                      topRight: Radius.circular(screenWidth * 0.6),
                     ),
                     image: const DecorationImage(
                       image: AssetImage('assets/images/texture_bg.jpg'),
                       fit: BoxFit.cover,
-                      opacity: 0.25, // transparan agar tidak terlalu mencolok
+                      opacity: 0.15, // transparan agar tidak terlalu mencolok
                     ),
                   ),
                 ),
@@ -423,7 +423,7 @@ class DashboardStudentScreen extends StatelessWidget {
   }
 }
 
-class _ChapterButton extends StatelessWidget {
+class _ChapterButton extends StatefulWidget {
   final String label;
   final VoidCallback onPressed;
   final DashboardStudentController controller;
@@ -437,49 +437,104 @@ class _ChapterButton extends StatelessWidget {
   });
 
   @override
+  State<_ChapterButton> createState() => _ChapterButtonState();
+}
+
+class _ChapterButtonState extends State<_ChapterButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _bounceController;
+  late Animation<double> _bounceAnimation;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _bounceController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _bounceAnimation = Tween<double>(begin: 0, end: 8).animate(
+      CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+    );
+    _bounceController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _bounceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final hasUnlocked = controller.hasUnlockedMaterial(label);
+    final hasUnlocked = widget.controller.hasUnlockedMaterial(widget.label);
 
     // Responsive sizing with min-max constraints
-    final iconSize = (screenWidth * 0.16).clamp(50.0, 80.0);
-    final fontSize = (screenWidth * 0.038).clamp(12.0, 16.0);
+    final iconSize = (widget.screenWidth * 0.16).clamp(50.0, 80.0);
+    final fontSize = (widget.screenWidth * 0.038).clamp(12.0, 16.0);
 
     return GestureDetector(
-      onTap: onPressed,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Book icon
-          Container(
-            width: iconSize,
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onPressed,
+      child: AnimatedBuilder(
+        animation: _bounceAnimation,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, -_bounceAnimation.value),
+            child: AnimatedScale(
+              scale: _isPressed ? 0.9 : 1.0,
+              duration: const Duration(milliseconds: 100),
+              child: child,
             ),
-            child: Image.asset(
-              hasUnlocked
-                  ? 'assets/images/open_book.png'
-                  : 'assets/images/close_book.png',
-              fit: BoxFit.contain,
+          );
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Book icon with glow effect when unlocked
+            Container(
+              width: iconSize,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: hasUnlocked
+                    ? [
+                        BoxShadow(
+                          color: Colors.amber.withValues(alpha: 0.5),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Image.asset(
+                hasUnlocked
+                    ? 'assets/images/open_book.png'
+                    : 'assets/images/close_book.png',
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
-          // Chapter label
-          Text(
-            label,
-            style: GoogleFonts.montserrat(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFFFFFFFF),
-              shadows: [
-                Shadow(
-                  offset: Offset(0, 4),
-                  blurRadius: 4,
-                  color: Colors.black26,
-                ),
-              ],
+            // Chapter label with animation
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 300),
+              style: GoogleFonts.montserrat(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: hasUnlocked ? Colors.amber.shade100 : Colors.white,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0, 4),
+                    blurRadius: 4,
+                    color: Colors.black26,
+                  ),
+                ],
+              ),
+              child: Text(widget.label),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

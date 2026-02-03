@@ -15,6 +15,7 @@ class VideoMaterialController extends GetxController {
   final showControls = true.obs;
   final isFullscreen = false.obs;
   final isVideoCompleted = false.obs; // Track if video is completed
+  final videoProgress = 0.0.obs; // Track video progress (0.0 to 1.0)
 
   final int topikId;
   final String videoUrl;
@@ -47,15 +48,16 @@ class VideoMaterialController extends GetxController {
         youtubeController = YoutubePlayerController(
           initialVideoId: videoId,
           flags: const YoutubePlayerFlags(
-            autoPlay: false,
+            autoPlay: true,
             mute: false,
             enableCaption: false,
-            controlsVisibleAtStart: true,
+            controlsVisibleAtStart: false,
             hideControls: false,
             disableDragSeek: false,
             loop: false,
             forceHD: false,
-            showLiveFullscreenButton: true
+            showLiveFullscreenButton: true,
+            useHybridComposition: true
           ),
         );
         
@@ -63,13 +65,17 @@ class VideoMaterialController extends GetxController {
         youtubeController!.addListener(() {
           if (youtubeController!.value.playerState == PlayerState.ended) {
             isVideoCompleted.value = true;
+            videoProgress.value = 1.0;
           }
-          // Also check if video is near end (95% watched)
+          // Update progress
           final position = youtubeController!.value.position;
           final duration = youtubeController!.metadata.duration;
-          if (duration.inSeconds > 0 && 
-              position.inSeconds >= (duration.inSeconds * 0.95)) {
-            isVideoCompleted.value = true;
+          if (duration.inSeconds > 0) {
+            videoProgress.value = position.inSeconds / duration.inSeconds;
+            // Check if video is near end (95% watched)
+            if (position.inSeconds >= (duration.inSeconds * 0.80)) {
+              isVideoCompleted.value = true;
+            }
           }
         });
         
@@ -104,10 +110,13 @@ class VideoMaterialController extends GetxController {
         isPlaying.value = videoController!.value.isPlaying;
         currentPosition.value = videoController!.value.position;
         
-        // Check if video is completed (95% watched)
-        if (totalDuration.value.inSeconds > 0 &&
-            currentPosition.value.inSeconds >= (totalDuration.value.inSeconds * 0.95)) {
-          isVideoCompleted.value = true;
+        // Update progress
+        if (totalDuration.value.inSeconds > 0) {
+          videoProgress.value = currentPosition.value.inSeconds / totalDuration.value.inSeconds;
+          // Check if video is completed (95% watched)
+          if (currentPosition.value.inSeconds >= (totalDuration.value.inSeconds * 0.95)) {
+            isVideoCompleted.value = true;
+          }
         }
       });
     } catch (e) {

@@ -3,8 +3,35 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/quiz_controller.dart';
 
-class QuizScreen extends StatelessWidget {
+class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
+
+  @override
+  State<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends State<QuizScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _timerPulseController;
+  late Animation<double> _timerPulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _timerPulseController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _timerPulse = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(parent: _timerPulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timerPulseController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,26 +137,64 @@ class QuizScreen extends StatelessWidget {
                         ),
                       ),
                       // Timer
-                      Obx(
-                        () => Row(
-                          children: [
-                            const Icon(
-                              Icons.access_time,
-                              color: Colors.white,
-                              size: 24,
+                      Obx(() {
+                        // Pulse animation when time is low
+                        if (controller.timeRemaining.value <= 10 &&
+                            controller.timeRemaining.value > 0) {
+                          if (!_timerPulseController.isAnimating) {
+                            _timerPulseController.repeat(reverse: true);
+                          }
+                        } else {
+                          if (_timerPulseController.isAnimating) {
+                            _timerPulseController.stop();
+                            _timerPulseController.reset();
+                          }
+                        }
+
+                        return ScaleTransition(
+                          scale: controller.timeRemaining.value <= 10
+                              ? _timerPulse
+                              : const AlwaysStoppedAnimation(1.0),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '00:${controller.timeRemaining.value.toString().padLeft(2, '0')}',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            decoration: BoxDecoration(
+                              color: controller.timeRemaining.value <= 10
+                                  ? Colors.red.withValues(alpha: 0.2)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(20),
+                              border: controller.timeRemaining.value <= 10
+                                  ? Border.all(color: Colors.red, width: 2)
+                                  : null,
                             ),
-                          ],
-                        ),
-                      ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  color: controller.timeRemaining.value <= 10
+                                      ? Colors.red
+                                      : Colors.white,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '00:${controller.timeRemaining.value.toString().padLeft(2, '0')}',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: controller.timeRemaining.value <= 10
+                                        ? Colors.red
+                                        : Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
                       // Logo
                       Container(
                         width: 50,
@@ -163,32 +228,50 @@ class QuizScreen extends StatelessWidget {
                             children: [
                               const SizedBox(height: 20),
 
-                              // Question box
+                              // Question box with AnimatedSwitcher
                               Obx(
-                                () => Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(15),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
+                                () => AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 400),
+                                  transitionBuilder: (child, animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0.1, 0),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
                                       ),
-                                    ],
-                                  ),
-                                  child: Text(
-                                    controller.currentQuestion.question,
-                                    textAlign: TextAlign.justify,
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                      height: 1.5,
+                                    );
+                                  },
+                                  child: Container(
+                                    key: ValueKey(
+                                      controller.currentQuestionIndex.value,
+                                    ),
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(15),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Text(
+                                      controller.currentQuestion.question,
+                                      textAlign: TextAlign.justify,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                        height: 1.5,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -247,33 +330,16 @@ class QuizScreen extends StatelessWidget {
                                             controller.selectedAnswerId.value ==
                                             answer.id;
 
-                                        Color backgroundColor;
-                                        Color borderColor;
                                         Color textColor;
                                         double opacity = 1.0;
 
                                         if (isTimeUpForQuestion) {
                                           // Grayed out when time is up
-                                          backgroundColor =
-                                              Colors.grey.shade200;
-                                          borderColor = Colors.grey.shade400;
                                           textColor = Colors.grey.shade600;
                                           opacity = 0.6;
-
-                                          if (isSelected) {
-                                            backgroundColor =
-                                                Colors.grey.shade300;
-                                            borderColor = Colors.grey.shade500;
-                                          }
                                         } else if (isSelected) {
-                                          backgroundColor = const Color(
-                                            0xFFCD3551,
-                                          );
-                                          borderColor = const Color(0xFFCD3551);
                                           textColor = Colors.white;
                                         } else {
-                                          backgroundColor = Colors.white;
-                                          borderColor = Colors.grey.shade300;
                                           textColor = Colors.black87;
                                         }
 
@@ -283,47 +349,17 @@ class QuizScreen extends StatelessWidget {
                                           ),
                                           child: Opacity(
                                             opacity: opacity,
-                                            child: InkWell(
+                                            child: _AnimatedAnswerOption(
+                                              isSelected: isSelected,
+                                              isTimeUp: isTimeUpForQuestion,
                                               onTap: () => controller
                                                   .selectAnswer(answer.id),
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                              child: Container(
-                                                width: double.infinity,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 15,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: backgroundColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                  border: Border.all(
-                                                    color: borderColor,
-                                                    width: 2,
-                                                  ),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.black
-                                                          .withValues(
-                                                            alpha: 0.1,
-                                                          ),
-                                                      blurRadius: 4,
-                                                      offset: const Offset(
-                                                        0,
-                                                        2,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: Text(
-                                                  '${answer.id}. ${answer.text}',
-                                                  style: GoogleFonts.montserrat(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: textColor,
-                                                  ),
+                                              child: Text(
+                                                '${answer.id}. ${answer.text}',
+                                                style: GoogleFonts.montserrat(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: textColor,
                                                 ),
                                               ),
                                             ),
@@ -485,6 +521,86 @@ class QuizScreen extends StatelessWidget {
               ],
             );
           }),
+        ),
+      ),
+    );
+  }
+}
+
+// Animated answer option with tap effect
+class _AnimatedAnswerOption extends StatefulWidget {
+  final bool isSelected;
+  final bool isTimeUp;
+  final VoidCallback onTap;
+  final Widget child;
+
+  const _AnimatedAnswerOption({
+    required this.isSelected,
+    required this.isTimeUp,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  State<_AnimatedAnswerOption> createState() => _AnimatedAnswerOptionState();
+}
+
+class _AnimatedAnswerOptionState extends State<_AnimatedAnswerOption> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    Color backgroundColor;
+    Color borderColor;
+
+    if (widget.isTimeUp) {
+      backgroundColor = widget.isSelected
+          ? Colors.grey.shade300
+          : Colors.grey.shade200;
+      borderColor = widget.isSelected
+          ? Colors.grey.shade500
+          : Colors.grey.shade400;
+    } else if (widget.isSelected) {
+      backgroundColor = const Color(0xFFCD3551);
+      borderColor = const Color(0xFFCD3551);
+    } else {
+      backgroundColor = Colors.white;
+      borderColor = Colors.grey.shade300;
+    }
+
+    return GestureDetector(
+      onTapDown: widget.isTimeUp
+          ? null
+          : (_) => setState(() => _isPressed = true),
+      onTapUp: widget.isTimeUp
+          ? null
+          : (_) {
+              setState(() => _isPressed = false);
+              widget.onTap();
+            },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.98 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: borderColor, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: widget.isSelected && !widget.isTimeUp
+                    ? const Color(0xFFCD3551).withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.1),
+                blurRadius: widget.isSelected ? 8 : 4,
+                offset: Offset(0, _isPressed ? 1 : 2),
+              ),
+            ],
+          ),
+          child: widget.child,
         ),
       ),
     );

@@ -4,8 +4,67 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/student_list_controller.dart';
 import '../services/auth_service.dart';
 
-class StudentListScreen extends StatelessWidget {
+class StudentListScreen extends StatefulWidget {
   const StudentListScreen({super.key});
+
+  @override
+  State<StudentListScreen> createState() => _StudentListScreenState();
+}
+
+class _StudentListScreenState extends State<StudentListScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _cardScale;
+  late Animation<Offset> _cardSlide;
+  late Animation<double> _titleFade;
+  late Animation<double> _tableFade;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _cardScale = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _cardSlide = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+          ),
+        );
+
+    _titleFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
+      ),
+    );
+
+    _tableFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,259 +106,203 @@ class StudentListScreen extends StatelessWidget {
               ),
 
               // Profile dropdown at top right
-              Positioned(
-                top: 16,
-                right: 16,
-                child: _buildProfileDropdown(),
-              ),
+              Positioned(top: 16, right: 16, child: _buildProfileDropdown()),
 
               // Main content
               Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 30,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Title
-                        Text(
-                          'DAFTAR PESERTA\nDIDIK',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.montserrat(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: const Color(0xFF1D4B8B),
-                            letterSpacing: 0.5,
-                            height: 1.3,
-                          ),
-                        ),
-
-                        const SizedBox(height: 25),
-
-                        // Table with horizontal scroll
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey.shade300,
-                                width: 1.5,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
+                  child: SlideTransition(
+                    position: _cardSlide,
+                    child: ScaleTransition(
+                      scale: _cardScale,
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
-                            child: Column(
-                              children: [
-                                // Table Header
-                                Container(
+                          ],
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 30,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Title with fade animation
+                            FadeTransition(
+                              opacity: _titleFade,
+                              child: Text(
+                                'DAFTAR PESERTA\nDIDIK',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900,
+                                  color: const Color(0xFF1D4B8B),
+                                  letterSpacing: 0.5,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 25),
+
+                            // Table with horizontal scroll and fade animation
+                            FadeTransition(
+                              opacity: _tableFade,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.shade200,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(12),
-                                      topRight: Radius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                      width: 1.5,
                                     ),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Row(
+                                  child: Column(
                                     children: [
-                                      SizedBox(
-                                        width: 50,
-                                        child: _buildHeaderCell('NO'),
+                                      // Table Header
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade200,
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(12),
+                                            topRight: Radius.circular(12),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 50,
+                                              child: _buildHeaderCell('NO'),
+                                            ),
+                                            _buildVerticalDivider(),
+                                            SizedBox(
+                                              width: 140,
+                                              child: _buildHeaderCell('NISN'),
+                                            ),
+                                            _buildVerticalDivider(),
+                                            SizedBox(
+                                              width: 180,
+                                              child: _buildHeaderCell('NAMA'),
+                                            ),
+                                            _buildVerticalDivider(),
+                                            SizedBox(
+                                              width: 100,
+                                              child: _buildHeaderCell('AKSI'),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      _buildVerticalDivider(),
-                                      SizedBox(
-                                        width: 140,
-                                        child: _buildHeaderCell('NISN'),
-                                      ),
-                                      _buildVerticalDivider(),
-                                      SizedBox(
-                                        width: 180,
-                                        child: _buildHeaderCell('NAMA'),
-                                      ),
-                                      _buildVerticalDivider(),
-                                      SizedBox(
-                                        width: 100,
-                                        child: _buildHeaderCell('AKSI'),
-                                      ),
+
+                                      // Table Rows with loading/error states
+                                      Obx(() {
+                                        if (controller.isLoading.value) {
+                                          return const Padding(
+                                            padding: EdgeInsets.all(20.0),
+                                            child: Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                          );
+                                        }
+
+                                        if (controller
+                                            .errorMessage
+                                            .isNotEmpty) {
+                                          return Padding(
+                                            padding: const EdgeInsets.all(20.0),
+                                            child: Text(
+                                              'Error: ${controller.errorMessage.value}',
+                                              style: const TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          );
+                                        }
+
+                                        if (controller.pesertaDidik.isEmpty) {
+                                          return const Padding(
+                                            padding: EdgeInsets.all(20.0),
+                                            child: Center(
+                                              child: Text(
+                                                'Tidak ada peserta didik',
+                                                style: TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+
+                                        return Column(
+                                          children: [
+                                            ...controller.pesertaDidik
+                                                .asMap()
+                                                .entries
+                                                .map((entry) {
+                                                  final index = entry.key;
+                                                  final student = entry.value;
+                                                  final isLast =
+                                                      index ==
+                                                      controller
+                                                              .pesertaDidik
+                                                              .length -
+                                                          1;
+
+                                                  return _AnimatedTableRow(
+                                                    index: index,
+                                                    student: student,
+                                                    isLast: isLast,
+                                                    controller: controller,
+                                                    buildDataCell:
+                                                        _buildDataCell,
+                                                    buildVerticalDivider:
+                                                        _buildVerticalDivider,
+                                                    buildActionCell:
+                                                        _buildActionCell,
+                                                  );
+                                                }),
+                                            if (controller.hasMore.value)
+                                              Padding(
+                                                padding: const EdgeInsets.all(
+                                                  16.0,
+                                                ),
+                                                child: _AnimatedLoadMoreButton(
+                                                  onPressed:
+                                                      controller.loadMore,
+                                                ),
+                                              ),
+                                          ],
+                                        );
+                                      }),
                                     ],
                                   ),
                                 ),
-
-                                // Table Rows with loading/error states
-                                Obx(() {
-                                  if (controller.isLoading.value) {
-                                    return const Padding(
-                                      padding: EdgeInsets.all(20.0),
-                                      child: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-
-                                  if (controller.errorMessage.isNotEmpty) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(20.0),
-                                      child: Text(
-                                        'Error: ${controller.errorMessage.value}',
-                                        style: const TextStyle(
-                                          color: Colors.red,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    );
-                                  }
-
-                                  if (controller.pesertaDidik.isEmpty) {
-                                    return const Padding(
-                                      padding: EdgeInsets.all(20.0),
-                                      child: Center(
-                                        child: Text(
-                                          'Tidak ada peserta didik',
-                                          style: TextStyle(color: Colors.grey),
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-                                  return Column(
-                                    children: [
-                                      ...controller.pesertaDidik
-                                          .asMap()
-                                          .entries
-                                          .map((entry) {
-                                            final index = entry.key;
-                                            final student = entry.value;
-                                            final isLast =
-                                                index ==
-                                                controller.pesertaDidik.length -
-                                                    1;
-
-                                            return Column(
-                                              children: [
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    color: index.isEven
-                                                        ? Colors.white
-                                                        : Colors.grey.shade50,
-                                                    borderRadius: isLast
-                                                        ? const BorderRadius.only(
-                                                            bottomLeft:
-                                                                Radius.circular(
-                                                                  12,
-                                                                ),
-                                                            bottomRight:
-                                                                Radius.circular(
-                                                                  12,
-                                                                ),
-                                                          )
-                                                        : BorderRadius.zero,
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      SizedBox(
-                                                        width: 50,
-                                                        child: _buildDataCell(
-                                                          (index + 1)
-                                                              .toString(),
-                                                        ),
-                                                      ),
-                                                      _buildVerticalDivider(),
-                                                      SizedBox(
-                                                        width: 140,
-                                                        child: _buildDataCell(
-                                                          student.nisn,
-                                                        ),
-                                                      ),
-                                                      _buildVerticalDivider(),
-                                                      SizedBox(
-                                                        width: 180,
-                                                        child: _buildDataCell(
-                                                          student.namaLengkap,
-                                                        ),
-                                                      ),
-                                                      _buildVerticalDivider(),
-                                                      SizedBox(
-                                                        width: 100,
-                                                        child: _buildActionCell(
-                                                          student,
-                                                          controller,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                if (!isLast)
-                                                  Divider(
-                                                    height: 1,
-                                                    thickness: 1,
-                                                    color: Colors.grey.shade300,
-                                                  ),
-                                              ],
-                                            );
-                                          })
-                                          .toList(),
-                                      if (controller.hasMore.value)
-                                        Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: ElevatedButton(
-                                            onPressed: controller.loadMore,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: const Color(
-                                                0xFF1565C0,
-                                              ),
-                                              foregroundColor: Colors.white,
-                                            ),
-                                            child: const Text('Muat Lebih'),
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                }),
-                              ],
+                              ),
                             ),
-                          ),
+
+                            const SizedBox(height: 25),
+
+                            // Kembali button with animation
+                            FadeTransition(
+                              opacity: _tableFade,
+                              child: _AnimatedBackButton(
+                                onPressed: controller.goBack,
+                              ),
+                            ),
+                          ],
                         ),
-
-                        const SizedBox(height: 25),
-
-                        // Kembali button
-                        ElevatedButton(
-                          onPressed: controller.goBack,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 50,
-                              vertical: 16,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            elevation: 5,
-                          ),
-                          child: Text(
-                            'Kembali',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -339,7 +342,7 @@ class StudentListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCell(student, StudentListController controller) {
+  Widget _buildActionCell(dynamic student, StudentListController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       child: Row(
@@ -464,7 +467,11 @@ class StudentListScreen extends StatelessWidget {
                       color: Color(0xFF1D4B8B),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.person, color: Colors.white, size: 24),
+                    child: const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -553,6 +560,187 @@ class StudentListScreen extends StatelessWidget {
             child: Text('Keluar', style: GoogleFonts.montserrat()),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Animated table row with staggered animation
+class _AnimatedTableRow extends StatelessWidget {
+  final int index;
+  final dynamic student;
+  final bool isLast;
+  final StudentListController controller;
+  final Widget Function(String) buildDataCell;
+  final Widget Function() buildVerticalDivider;
+  final Widget Function(dynamic, StudentListController) buildActionCell;
+
+  const _AnimatedTableRow({
+    required this.index,
+    required this.student,
+    required this.isLast,
+    required this.controller,
+    required this.buildDataCell,
+    required this.buildVerticalDivider,
+    required this.buildActionCell,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 300 + (index * 50)),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(20 * (1 - value), 0),
+            child: child,
+          ),
+        );
+      },
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: index.isEven ? Colors.white : Colors.grey.shade50,
+              borderRadius: isLast
+                  ? const BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    )
+                  : BorderRadius.zero,
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 50,
+                  child: buildDataCell((index + 1).toString()),
+                ),
+                buildVerticalDivider(),
+                SizedBox(width: 140, child: buildDataCell(student.nisn)),
+                buildVerticalDivider(),
+                SizedBox(width: 180, child: buildDataCell(student.namaLengkap)),
+                buildVerticalDivider(),
+                SizedBox(
+                  width: 100,
+                  child: buildActionCell(student, controller),
+                ),
+              ],
+            ),
+          ),
+          if (!isLast)
+            Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+        ],
+      ),
+    );
+  }
+}
+
+// Animated load more button
+class _AnimatedLoadMoreButton extends StatefulWidget {
+  final VoidCallback onPressed;
+
+  const _AnimatedLoadMoreButton({required this.onPressed});
+
+  @override
+  State<_AnimatedLoadMoreButton> createState() =>
+      _AnimatedLoadMoreButtonState();
+}
+
+class _AnimatedLoadMoreButtonState extends State<_AnimatedLoadMoreButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onPressed();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1565C0),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1565C0).withValues(alpha: 0.4),
+                blurRadius: _isPressed ? 5 : 10,
+                offset: Offset(0, _isPressed ? 2 : 4),
+              ),
+            ],
+          ),
+          child: const Text(
+            'Muat Lebih',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Animated back button
+class _AnimatedBackButton extends StatefulWidget {
+  final VoidCallback onPressed;
+
+  const _AnimatedBackButton({required this.onPressed});
+
+  @override
+  State<_AnimatedBackButton> createState() => _AnimatedBackButtonState();
+}
+
+class _AnimatedBackButtonState extends State<_AnimatedBackButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onPressed();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: _isPressed ? 5 : 10,
+                offset: Offset(0, _isPressed ? 2 : 5),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Kembali',
+                style: GoogleFonts.montserrat(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
