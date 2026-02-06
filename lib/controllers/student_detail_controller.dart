@@ -95,6 +95,10 @@ class StudentDetailController extends GetxController {
     }
   }
 
+  Future<void> refreshData() async {
+    await _loadNilaiFromApi();
+  }
+
   void toggleChapter(int babId) {
     if (expandedChapters.contains(babId)) {
       expandedChapters.remove(babId);

@@ -7,10 +7,11 @@ import 'services/auth_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+ 
   // Set system UI to light mode
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
+    SystemUiOverlayStyle.light.copyWith(
       statusBarColor: Colors.transparent, // Transparent status bar
       statusBarIconBrightness: Brightness.dark, // Dark icons for light background
       statusBarBrightness: Brightness.light, // For iOS
@@ -34,6 +35,7 @@ class MainApp extends StatelessWidget {
       title: 'Petualangan IPAS',
       debugShowCheckedModeBanner: false,
       theme: _buildTheme(Brightness.light),
+      themeMode: ThemeMode.light,
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
     );

@@ -323,9 +323,20 @@ class _QuizScreenState extends State<QuizScreen>
                                 final isTimeUpForQuestion =
                                     controller.isTimeUp.value;
 
+                                // Map untuk label A-D
+                                const labels = ['A', 'B', 'C', 'D'];
+
                                 return Column(
                                   children: controller.currentQuestion.answers
-                                      .map((answer) {
+                                      .asMap()
+                                      .entries
+                                      .map((entry) {
+                                        final index = entry.key;
+                                        final answer = entry.value;
+                                        final label = index < labels.length
+                                            ? labels[index]
+                                            : '${index + 1}';
+
                                         final isSelected =
                                             controller.selectedAnswerId.value ==
                                             answer.id;
@@ -355,7 +366,7 @@ class _QuizScreenState extends State<QuizScreen>
                                               onTap: () => controller
                                                   .selectAnswer(answer.id),
                                               child: Text(
-                                                '${answer.id}. ${answer.text}',
+                                                '$label. ${answer.text}',
                                                 style: GoogleFonts.montserrat(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w600,

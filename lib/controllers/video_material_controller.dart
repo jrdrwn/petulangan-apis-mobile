@@ -57,7 +57,7 @@ class VideoMaterialController extends GetxController {
             loop: false,
             forceHD: false,
             showLiveFullscreenButton: true,
-            useHybridComposition: true
+            useHybridComposition: false
           ),
         );
         
@@ -72,8 +72,8 @@ class VideoMaterialController extends GetxController {
           final duration = youtubeController!.metadata.duration;
           if (duration.inSeconds > 0) {
             videoProgress.value = position.inSeconds / duration.inSeconds;
-            // Check if video is near end (95% watched)
-            if (position.inSeconds >= (duration.inSeconds * 0.80)) {
+            // Check if video is near end (90% watched)
+            if (position.inSeconds >= (duration.inSeconds * 0.90)) {
               isVideoCompleted.value = true;
             }
           }
@@ -113,8 +113,8 @@ class VideoMaterialController extends GetxController {
         // Update progress
         if (totalDuration.value.inSeconds > 0) {
           videoProgress.value = currentPosition.value.inSeconds / totalDuration.value.inSeconds;
-          // Check if video is completed (95% watched)
-          if (currentPosition.value.inSeconds >= (totalDuration.value.inSeconds * 0.95)) {
+          // Check if video is completed (90% watched)
+          if (currentPosition.value.inSeconds >= (totalDuration.value.inSeconds * 0.90)) {
             isVideoCompleted.value = true;
           }
         }

@@ -110,85 +110,157 @@ class _StudentDetailScreenState extends State<StudentDetailScreen>
 
               // Main content
               Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
-                  child: Obx(() {
-                    if (controller.isLoading.value) {
-                      return SlideTransition(
-                        position: _cardSlide,
-                        child: ScaleTransition(
-                          scale: _cardScale,
-                          child: Container(
-                            constraints: const BoxConstraints(maxWidth: 450),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.all(50),
-                            child: const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    if (controller.errorMessage.isNotEmpty) {
-                      return SlideTransition(
-                        position: _cardSlide,
-                        child: ScaleTransition(
-                          scale: _cardScale,
-                          child: Container(
-                            constraints: const BoxConstraints(maxWidth: 450),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.all(25),
-                            child: Column(
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  size: 60,
-                                  color: Colors.red,
-                                ),
-                                const SizedBox(height: 20),
-                                Text(
-                                  'Error: ${controller.errorMessage.value}',
-                                  style: const TextStyle(color: Colors.red),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  onPressed: controller.goBack,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    foregroundColor: Colors.white,
+                child: RefreshIndicator(
+                  onRefresh: () => controller.refreshData(),
+                  color: const Color(0xFF1565C0),
+                  backgroundColor: Colors.white,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+                    child: Obx(() {
+                      if (controller.isLoading.value) {
+                        return SlideTransition(
+                          position: _cardSlide,
+                          child: ScaleTransition(
+                            scale: _cardScale,
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 450),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
                                   ),
-                                  child: const Text('Kembali'),
-                                ),
-                              ],
+                                ],
+                              ),
+                              padding: const EdgeInsets.all(50),
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }
+                        );
+                      }
 
-                    if (controller.nilaiData.isEmpty) {
+                      if (controller.errorMessage.isNotEmpty) {
+                        return SlideTransition(
+                          position: _cardSlide,
+                          child: ScaleTransition(
+                            scale: _cardScale,
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 450),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              padding: const EdgeInsets.all(25),
+                              child: Column(
+                                children: [
+                                  const Icon(
+                                    Icons.error_outline,
+                                    size: 60,
+                                    color: Colors.red,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    'Error: ${controller.errorMessage.value}',
+                                    style: const TextStyle(color: Colors.red),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton(
+                                    onPressed: controller.goBack,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: const Text('Kembali'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (controller.nilaiData.isEmpty) {
+                        return SlideTransition(
+                          position: _cardSlide,
+                          child: ScaleTransition(
+                            scale: _cardScale,
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 450),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              padding: const EdgeInsets.all(25),
+                              child: Column(
+                                children: [
+                                  FadeTransition(
+                                    opacity: _headerFade,
+                                    child: Text(
+                                      controller.name.toUpperCase(),
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                        color: const Color(0xFF1D4B8B),
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  FadeTransition(
+                                    opacity: _headerFade,
+                                    child: Text(
+                                      controller.nisn,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF1D4B8B),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 25),
+                                  const Text(
+                                    'Belum ada data nilai',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton(
+                                    onPressed: controller.goBack,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: const Text('Kembali'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
                       return SlideTransition(
                         position: _cardSlide,
                         child: ScaleTransition(
@@ -208,7 +280,9 @@ class _StudentDetailScreenState extends State<StudentDetailScreen>
                             ),
                             padding: const EdgeInsets.all(25),
                             child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
+                                // Student Info Header with animation
                                 FadeTransition(
                                   opacity: _headerFade,
                                   child: Text(
@@ -235,168 +309,100 @@ class _StudentDetailScreenState extends State<StudentDetailScreen>
                                     ),
                                   ),
                                 ),
+
                                 const SizedBox(height: 25),
-                                const Text(
-                                  'Belum ada data nilai',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  onPressed: controller.goBack,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    foregroundColor: Colors.white,
+
+                                // Progress Content with horizontal scroll - animated
+                                FadeTransition(
+                                  opacity: _contentFade,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Container(
+                                      constraints: const BoxConstraints(
+                                        minWidth: 400,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // Header row
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                              horizontal: 15,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF1565C0),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 220,
+                                                  child: _buildHeaderText(
+                                                    'Materi Petualangan',
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 120,
+                                                  child: _buildHeaderText(
+                                                    'Status',
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 80,
+                                                  child: Center(
+                                                    child: _buildHeaderText(
+                                                      'Nilai',
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          const SizedBox(height: 15),
+
+                                          // Chapter list from API with staggered animation
+                                          ...controller.nilaiData
+                                              .asMap()
+                                              .entries
+                                              .map((entry) {
+                                                final index = entry.key;
+                                                final bab = entry.value;
+                                                return _AnimatedChapterRow(
+                                                  index: index,
+                                                  animationController:
+                                                      _animationController,
+                                                  child:
+                                                      _buildCollapsibleChapter(
+                                                        bab,
+                                                        controller,
+                                                      ),
+                                                );
+                                              }),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                  child: const Text('Kembali'),
+                                ),
+
+                                const SizedBox(height: 25),
+
+                                // Kembali button with animation
+                                _AnimatedBackButton(
+                                  animationController: _animationController,
+                                  onPressed: controller.goBack,
                                 ),
                               ],
                             ),
                           ),
                         ),
                       );
-                    }
-
-                    return SlideTransition(
-                      position: _cardSlide,
-                      child: ScaleTransition(
-                        scale: _cardScale,
-                        child: Container(
-                          constraints: const BoxConstraints(maxWidth: 450),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.all(25),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Student Info Header with animation
-                              FadeTransition(
-                                opacity: _headerFade,
-                                child: Text(
-                                  controller.name.toUpperCase(),
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w900,
-                                    color: const Color(0xFF1D4B8B),
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              FadeTransition(
-                                opacity: _headerFade,
-                                child: Text(
-                                  controller.nisn,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1D4B8B),
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 25),
-
-                              // Progress Content with horizontal scroll - animated
-                              FadeTransition(
-                                opacity: _contentFade,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Container(
-                                    constraints: const BoxConstraints(
-                                      minWidth: 400,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        // Header row
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 12,
-                                            horizontal: 15,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF1565C0),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 220,
-                                                child: _buildHeaderText(
-                                                  'Materi Petualangan',
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 120,
-                                                child: _buildHeaderText(
-                                                  'Status',
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 80,
-                                                child: Center(
-                                                  child: _buildHeaderText(
-                                                    'Nilai',
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        const SizedBox(height: 15),
-
-                                        // Chapter list from API with staggered animation
-                                        ...controller.nilaiData
-                                            .asMap()
-                                            .entries
-                                            .map((entry) {
-                                              final index = entry.key;
-                                              final bab = entry.value;
-                                              return _AnimatedChapterRow(
-                                                index: index,
-                                                animationController:
-                                                    _animationController,
-                                                child: _buildCollapsibleChapter(
-                                                  bab,
-                                                  controller,
-                                                ),
-                                              );
-                                            }),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 25),
-
-                              // Kembali button with animation
-                              _AnimatedBackButton(
-                                animationController: _animationController,
-                                onPressed: controller.goBack,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
+                    }),
+                  ),
                 ),
               ),
             ],

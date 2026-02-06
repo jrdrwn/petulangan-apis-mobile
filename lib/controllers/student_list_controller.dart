@@ -191,15 +191,14 @@ class StudentListController extends GetxController {
 
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
         // Get download directory
         final directory = await getApplicationDocumentsDirectory();
-        final fileName = 'Laporan_${student.namaLengkap.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final fileName =
+            'Laporan_${student.namaLengkap.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
         final filePath = '${directory.path}/$fileName';
 
         // Save file
@@ -210,7 +209,7 @@ class StudentListController extends GetxController {
 
         // Open the PDF file
         final result = await OpenFilex.open(filePath);
-        
+
         if (result.type != ResultType.done) {
           Get.snackbar(
             'Info',
@@ -241,6 +240,13 @@ class StudentListController extends GetxController {
         colorText: Colors.white,
       );
     }
+  }
+
+  Future<void> refreshData() async {
+    offset = 0;
+    hasMore.value = true;
+    pesertaDidik.clear();
+    await _loadStudentsFromApi();
   }
 
   void goBack() {

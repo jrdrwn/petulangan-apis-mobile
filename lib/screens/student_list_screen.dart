@@ -110,197 +110,207 @@ class _StudentListScreenState extends State<StudentListScreen>
 
               // Main content
               Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
-                  child: SlideTransition(
-                    position: _cardSlide,
-                    child: ScaleTransition(
-                      scale: _cardScale,
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 600),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 30,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Title with fade animation
-                            FadeTransition(
-                              opacity: _titleFade,
-                              child: Text(
-                                'DAFTAR PESERTA\nDIDIK',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w900,
-                                  color: const Color(0xFF1D4B8B),
-                                  letterSpacing: 0.5,
-                                  height: 1.3,
+                child: RefreshIndicator(
+                  onRefresh: () => controller.refreshData(),
+                  color: const Color(0xFF1565C0),
+                  backgroundColor: Colors.white,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+                    child: SlideTransition(
+                      position: _cardSlide,
+                      child: ScaleTransition(
+                        scale: _cardScale,
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 30,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Title with fade animation
+                              FadeTransition(
+                                opacity: _titleFade,
+                                child: Text(
+                                  'DAFTAR PESERTA\nDIDIK',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900,
+                                    color: const Color(0xFF1D4B8B),
+                                    letterSpacing: 0.5,
+                                    height: 1.3,
+                                  ),
                                 ),
                               ),
-                            ),
 
-                            const SizedBox(height: 25),
+                              const SizedBox(height: 25),
 
-                            // Table with horizontal scroll and fade animation
-                            FadeTransition(
-                              opacity: _tableFade,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                      width: 1.5,
+                              // Table with horizontal scroll and fade animation
+                              FadeTransition(
+                                opacity: _tableFade,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey.shade300,
+                                        width: 1.5,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      // Table Header
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade200,
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                            topRight: Radius.circular(12),
+                                    child: Column(
+                                      children: [
+                                        // Table Header
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade200,
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                  topLeft: Radius.circular(12),
+                                                  topRight: Radius.circular(12),
+                                                ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 50,
+                                                child: _buildHeaderCell('NO'),
+                                              ),
+                                              _buildVerticalDivider(),
+                                              SizedBox(
+                                                width: 140,
+                                                child: _buildHeaderCell('NISN'),
+                                              ),
+                                              _buildVerticalDivider(),
+                                              SizedBox(
+                                                width: 180,
+                                                child: _buildHeaderCell('NAMA'),
+                                              ),
+                                              _buildVerticalDivider(),
+                                              SizedBox(
+                                                width: 100,
+                                                child: _buildHeaderCell('AKSI'),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        child: Row(
-                                          children: [
-                                            SizedBox(
-                                              width: 50,
-                                              child: _buildHeaderCell('NO'),
-                                            ),
-                                            _buildVerticalDivider(),
-                                            SizedBox(
-                                              width: 140,
-                                              child: _buildHeaderCell('NISN'),
-                                            ),
-                                            _buildVerticalDivider(),
-                                            SizedBox(
-                                              width: 180,
-                                              child: _buildHeaderCell('NAMA'),
-                                            ),
-                                            _buildVerticalDivider(),
-                                            SizedBox(
-                                              width: 100,
-                                              child: _buildHeaderCell('AKSI'),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
 
-                                      // Table Rows with loading/error states
-                                      Obx(() {
-                                        if (controller.isLoading.value) {
-                                          return const Padding(
-                                            padding: EdgeInsets.all(20.0),
-                                            child: Center(
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            ),
-                                          );
-                                        }
-
-                                        if (controller
-                                            .errorMessage
-                                            .isNotEmpty) {
-                                          return Padding(
-                                            padding: const EdgeInsets.all(20.0),
-                                            child: Text(
-                                              'Error: ${controller.errorMessage.value}',
-                                              style: const TextStyle(
-                                                color: Colors.red,
+                                        // Table Rows with loading/error states
+                                        Obx(() {
+                                          if (controller.isLoading.value) {
+                                            return const Padding(
+                                              padding: EdgeInsets.all(20.0),
+                                              child: Center(
+                                                child:
+                                                    CircularProgressIndicator(),
                                               ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          );
-                                        }
+                                            );
+                                          }
 
-                                        if (controller.pesertaDidik.isEmpty) {
-                                          return const Padding(
-                                            padding: EdgeInsets.all(20.0),
-                                            child: Center(
+                                          if (controller
+                                              .errorMessage
+                                              .isNotEmpty) {
+                                            return Padding(
+                                              padding: const EdgeInsets.all(
+                                                20.0,
+                                              ),
                                               child: Text(
-                                                'Tidak ada peserta didik',
-                                                style: TextStyle(
-                                                  color: Colors.grey,
+                                                'Error: ${controller.errorMessage.value}',
+                                                style: const TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            );
+                                          }
+
+                                          if (controller.pesertaDidik.isEmpty) {
+                                            return const Padding(
+                                              padding: EdgeInsets.all(20.0),
+                                              child: Center(
+                                                child: Text(
+                                                  'Tidak ada peserta didik',
+                                                  style: TextStyle(
+                                                    color: Colors.grey,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
+                                            );
+                                          }
+
+                                          return Column(
+                                            children: [
+                                              ...controller.pesertaDidik
+                                                  .asMap()
+                                                  .entries
+                                                  .map((entry) {
+                                                    final index = entry.key;
+                                                    final student = entry.value;
+                                                    final isLast =
+                                                        index ==
+                                                        controller
+                                                                .pesertaDidik
+                                                                .length -
+                                                            1;
+
+                                                    return _AnimatedTableRow(
+                                                      index: index,
+                                                      student: student,
+                                                      isLast: isLast,
+                                                      controller: controller,
+                                                      buildDataCell:
+                                                          _buildDataCell,
+                                                      buildVerticalDivider:
+                                                          _buildVerticalDivider,
+                                                      buildActionCell:
+                                                          _buildActionCell,
+                                                    );
+                                                  }),
+                                              if (controller.hasMore.value)
+                                                Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    16.0,
+                                                  ),
+                                                  child:
+                                                      _AnimatedLoadMoreButton(
+                                                        onPressed:
+                                                            controller.loadMore,
+                                                      ),
+                                                ),
+                                            ],
                                           );
-                                        }
-
-                                        return Column(
-                                          children: [
-                                            ...controller.pesertaDidik
-                                                .asMap()
-                                                .entries
-                                                .map((entry) {
-                                                  final index = entry.key;
-                                                  final student = entry.value;
-                                                  final isLast =
-                                                      index ==
-                                                      controller
-                                                              .pesertaDidik
-                                                              .length -
-                                                          1;
-
-                                                  return _AnimatedTableRow(
-                                                    index: index,
-                                                    student: student,
-                                                    isLast: isLast,
-                                                    controller: controller,
-                                                    buildDataCell:
-                                                        _buildDataCell,
-                                                    buildVerticalDivider:
-                                                        _buildVerticalDivider,
-                                                    buildActionCell:
-                                                        _buildActionCell,
-                                                  );
-                                                }),
-                                            if (controller.hasMore.value)
-                                              Padding(
-                                                padding: const EdgeInsets.all(
-                                                  16.0,
-                                                ),
-                                                child: _AnimatedLoadMoreButton(
-                                                  onPressed:
-                                                      controller.loadMore,
-                                                ),
-                                              ),
-                                          ],
-                                        );
-                                      }),
-                                    ],
+                                        }),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
 
-                            const SizedBox(height: 25),
+                              const SizedBox(height: 25),
 
-                            // Kembali button with animation
-                            FadeTransition(
-                              opacity: _tableFade,
-                              child: _AnimatedBackButton(
-                                onPressed: controller.goBack,
+                              // Kembali button with animation
+                              FadeTransition(
+                                opacity: _tableFade,
+                                child: _AnimatedBackButton(
+                                  onPressed: controller.goBack,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

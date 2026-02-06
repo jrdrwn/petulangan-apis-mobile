@@ -44,17 +44,12 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
     );
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent, // Transparent status bar
-        statusBarIconBrightness:
-            Brightness.dark, // Dark icons for light background
-        statusBarBrightness: Brightness.light, // For iOS
-        systemNavigationBarColor: Colors.white, // White navigation bar
-        systemNavigationBarIconBrightness:
-            Brightness.dark, // Dark icons for navigation bar
-      ),
-    );
+    // SystemChrome.setSystemUIOverlayStyle(
+    //   SystemUiOverlayStyle.light.copyWith(
+    //     statusBarColor: Colors.transparent,
+    //     systemNavigationBarColor: Colors.black,
+    //   ),
+    // );
     super.dispose();
   }
 
@@ -91,6 +86,19 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
   // YouTube video screen with YoutubePlayerBuilder
   Widget _buildYoutubeScreen(VideoMaterialController controller) {
     return YoutubePlayerBuilder(
+      onExitFullScreen: () {
+        SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: SystemUiOverlay.values,
+        );
+
+        SystemChrome.setSystemUIOverlayStyle(
+          SystemUiOverlayStyle.light.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.black,
+          ),
+        );
+      },
       player: YoutubePlayer(
         controller: controller.youtubeController!,
         showVideoProgressIndicator: true,
@@ -111,20 +119,26 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
       builder: (context, player) {
         return Scaffold(
           body: Container(
+            width: double.infinity,
+            height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/bg.png'),
-                fit: BoxFit.fill,
+                fit: BoxFit.cover,
               ),
             ),
             child: SafeArea(
               child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildHeader(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                  ),
+                  child: Column(
+                    children: [
+                      _buildHeader(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
                         children: [
                           const SizedBox(height: 20),
                           _buildTitle(),
@@ -153,11 +167,11 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
                               ),
                             );
                           }),
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 35),
                           _buildStartButton(controller),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 10),
                           _buildDescription(),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
                           _buildCharacterImage(),
                         ],
                       ),
@@ -167,6 +181,7 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
               ),
             ),
           ),
+          )
         );
       },
     );
@@ -176,10 +191,12 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
   Widget _buildRegularVideoScreen(VideoMaterialController controller) {
     return Scaffold(
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/bg.png'),
-            fit: BoxFit.fill,
+            fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
@@ -191,7 +208,11 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
               }
             },
             child: SingleChildScrollView(
-              child: Column(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                ),
+                child: Column(
                 children: [
                   _buildHeader(),
                   Padding(
@@ -228,12 +249,13 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
           ),
         ),
       ),
+      )
     );
   }
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         children: [
           IconButton(
@@ -714,11 +736,6 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
                 key: const ValueKey('completed'),
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: Colors.greenAccent.shade400,
-                    size: 18,
-                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Video selesai! Kamu siap untuk memulai misi.',
@@ -742,12 +759,6 @@ class _VideoMaterialScreenState extends State<VideoMaterialScreen>
                 key: const ValueKey('watching'),
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.play_circle_outline,
-                    color: Colors.white70,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 6),
                   Flexible(
                     child: Text(
                       'Tonton video sampai selesai untuk membuka tombol Mulai Misi',
