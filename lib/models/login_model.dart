@@ -4,7 +4,7 @@ part 'login_model.freezed.dart';
 part 'login_model.g.dart';
 
 @freezed
-class LoginRequest with _$LoginRequest {
+abstract class LoginRequest with _$LoginRequest {
   const factory LoginRequest({required String nisn}) = _LoginRequest;
 
   factory LoginRequest.fromJson(Map<String, dynamic> json) =>
@@ -12,7 +12,7 @@ class LoginRequest with _$LoginRequest {
 }
 
 @freezed
-class LoginResponse with _$LoginResponse {
+abstract class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
     required String token,
     @JsonKey(name: 'peserta_didik') required PesertaDidikData pesertaDidik,
@@ -23,7 +23,7 @@ class LoginResponse with _$LoginResponse {
 }
 
 @freezed
-class PesertaDidikData with _$PesertaDidikData {
+abstract class PesertaDidikData with _$PesertaDidikData {
   const factory PesertaDidikData({
     required int id,
     @JsonKey(name: 'nama_lengkap') required String namaLengkap,
@@ -36,7 +36,7 @@ class PesertaDidikData with _$PesertaDidikData {
 }
 
 @freezed
-class LoginGuruRequest with _$LoginGuruRequest {
+abstract class LoginGuruRequest with _$LoginGuruRequest {
   const factory LoginGuruRequest({
     required String nip,
     required String password,
@@ -48,7 +48,7 @@ class LoginGuruRequest with _$LoginGuruRequest {
 }
 
 @freezed
-class LoginGuruResponse with _$LoginGuruResponse {
+abstract class LoginGuruResponse with _$LoginGuruResponse {
   const factory LoginGuruResponse({
     required String token,
     required GuruData guru,
@@ -59,14 +59,14 @@ class LoginGuruResponse with _$LoginGuruResponse {
 }
 
 @freezed
-class GuruData with _$GuruData {
+abstract class GuruData with _$GuruData {
   const factory GuruData({
     required int id,
     @JsonKey(name: 'nama_lengkap') required String namaLengkap,
-    required String email,
+    String? email,
     required String nip,
-    required String password,
-    @JsonKey(name: 'no_telepon') required String noTelepon,
+    String? password,
+    @JsonKey(name: 'no_telepon') String? noTelepon,
     @JsonKey(name: 'sekolah_id') required int sekolahId,
   }) = _GuruData;
 

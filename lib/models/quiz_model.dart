@@ -4,7 +4,7 @@ part 'quiz_model.freezed.dart';
 part 'quiz_model.g.dart';
 
 @freezed
-class QuizModel with _$QuizModel {
+abstract class QuizModel with _$QuizModel {
   const factory QuizModel({
     required int id,
     @JsonKey(name: 'topik_id') required int topikId,
@@ -19,7 +19,7 @@ class QuizModel with _$QuizModel {
 }
 
 @freezed
-class QuizAnswerItem with _$QuizAnswerItem {
+abstract class QuizAnswerItem with _$QuizAnswerItem {
   const factory QuizAnswerItem({
     @JsonKey(name: 'quiz_id') required int quizId,
     required String jawaban,
@@ -30,7 +30,7 @@ class QuizAnswerItem with _$QuizAnswerItem {
 }
 
 @freezed
-class QuizSubmitRequest with _$QuizSubmitRequest {
+abstract class QuizSubmitRequest with _$QuizSubmitRequest {
   const factory QuizSubmitRequest({
     @JsonKey(name: 'hasil_quiz') required List<QuizAnswerItem> hasilQuiz,
   }) = _QuizSubmitRequest;
@@ -40,7 +40,7 @@ class QuizSubmitRequest with _$QuizSubmitRequest {
 }
 
 @freezed
-class QuizSubmitResponse with _$QuizSubmitResponse {
+abstract class QuizSubmitResponse with _$QuizSubmitResponse {
   const factory QuizSubmitResponse({required String message}) =
       _QuizSubmitResponse;
 

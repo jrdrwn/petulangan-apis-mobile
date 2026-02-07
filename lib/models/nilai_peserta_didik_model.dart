@@ -4,7 +4,7 @@ part 'nilai_peserta_didik_model.freezed.dart';
 part 'nilai_peserta_didik_model.g.dart';
 
 @freezed
-class NilaiQuizModel with _$NilaiQuizModel {
+abstract class NilaiQuizModel with _$NilaiQuizModel {
   const factory NilaiQuizModel({
     required int id,
     @JsonKey(name: 'peserta_didik_id') required int pesertaDidikId,
@@ -22,7 +22,7 @@ class NilaiQuizModel with _$NilaiQuizModel {
 }
 
 @freezed
-class TopikNilaiModel with _$TopikNilaiModel {
+abstract class TopikNilaiModel with _$TopikNilaiModel {
   const factory TopikNilaiModel({
     required int id,
     @JsonKey(name: 'bab_id') required int babId,
@@ -38,7 +38,7 @@ class TopikNilaiModel with _$TopikNilaiModel {
 }
 
 @freezed
-class BabNilaiModel with _$BabNilaiModel {
+abstract class BabNilaiModel with _$BabNilaiModel {
   const factory BabNilaiModel({
     required int id,
     required String nomor,

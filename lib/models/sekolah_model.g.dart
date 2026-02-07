@@ -6,8 +6,8 @@ part of 'sekolah_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SekolahModelImpl _$$SekolahModelImplFromJson(Map<String, dynamic> json) =>
-    _$SekolahModelImpl(
+_SekolahModel _$SekolahModelFromJson(Map<String, dynamic> json) =>
+    _SekolahModel(
       id: (json['id'] as num).toInt(),
       nama: json['nama'] as String,
       alamat: json['alamat'] as String,
@@ -16,7 +16,7 @@ _$SekolahModelImpl _$$SekolahModelImplFromJson(Map<String, dynamic> json) =>
       tahunAjaran: json['tahun_ajaran'] as String,
     );
 
-Map<String, dynamic> _$$SekolahModelImplToJson(_$SekolahModelImpl instance) =>
+Map<String, dynamic> _$SekolahModelToJson(_SekolahModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'nama': instance.nama,

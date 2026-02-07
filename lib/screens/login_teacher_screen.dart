@@ -376,6 +376,24 @@ class _LoginTeacherScreenState extends State<LoginTeacherScreen>
                           ),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      // Link to register teacher
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: TextButton(
+                          onPressed: () => Get.toNamed('/register-teacher'),
+                          child: Text(
+                            'Belum punya akun? Daftar',
+                            style: GoogleFonts.montserrat(
+                              color: const Color(0xFF1565C0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
+                              decorationColor: const Color(0xFF1565C0),
+                            ),
+                          ),
+                        ),
+                      ),
                       const Spacer(),
                       // Animated link to student login
                       FadeTransition(

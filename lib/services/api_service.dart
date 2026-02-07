@@ -306,4 +306,251 @@ class ApiService {
       throw ApiException('Terjadi kesalahan: ${e.toString()}');
     }
   }
+
+  // Update profile peserta didik
+  Future<void> updateProfilePesertaDidik({
+    String? namaLengkap,
+    String? nisn,
+    int? kelasId,
+    required String token,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (namaLengkap != null && namaLengkap.isNotEmpty) {
+        body['nama_lengkap'] = namaLengkap;
+      }
+      if (nisn != null && nisn.isNotEmpty) {
+        body['nisn'] = nisn;
+      }
+      if (kelasId != null) {
+        body['kelas_id'] = kelasId;
+      }
+
+      final response = await http
+          .put(
+            Uri.parse('$baseUrl/peserta-didik/profile'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: json.encode(body),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Unauthorized - Token tidak valid',
+          response.statusCode,
+        );
+      } else {
+        final error = json.decode(response.body);
+        throw ApiException(
+          error['message'] ?? 'Gagal update profil',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // Reset progress peserta didik
+  Future<void> resetProgressPesertaDidik(String token) async {
+    try {
+      final response = await http
+          .delete(
+            Uri.parse('$baseUrl/peserta-didik/reset'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Unauthorized - Token tidak valid',
+          response.statusCode,
+        );
+      } else {
+        final error = json.decode(response.body);
+        throw ApiException(
+          error['message'] ?? 'Gagal reset progress',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // Delete account peserta didik
+  Future<void> deleteAccountPesertaDidik(String token) async {
+    try {
+      final response = await http
+          .delete(
+            Uri.parse('$baseUrl/peserta-didik/profile'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Unauthorized - Token tidak valid',
+          response.statusCode,
+        );
+      } else {
+        final error = json.decode(response.body);
+        throw ApiException(
+          error['message'] ?? 'Gagal hapus akun',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // Register guru
+  Future<void> registerGuru({
+    required String namaLengkap,
+    required String nip,
+    required String password,
+    required int sekolahId,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/guru/register'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'nama_lengkap': namaLengkap,
+              'nip': nip,
+              'password': password,
+              'sekolah_id': sekolahId,
+            }),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      } else {
+        final error = json.decode(response.body);
+        throw ApiException(
+          error['message'] ?? 'Gagal mendaftar guru',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // Update profile guru
+  Future<void> updateProfileGuru({
+    String? namaLengkap,
+    String? email,
+    String? nip,
+    String? password,
+    String? noTelepon,
+    int? sekolahId,
+    required String token,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (namaLengkap != null && namaLengkap.isNotEmpty) {
+        body['nama_lengkap'] = namaLengkap;
+      }
+      if (email != null) {
+        body['email'] = email.isNotEmpty ? email : null;
+      }
+      if (nip != null && nip.isNotEmpty) {
+        body['nip'] = nip;
+      }
+      if (password != null && password.isNotEmpty) {
+        body['password'] = password;
+      }
+      if (noTelepon != null) {
+        body['no_telepon'] = noTelepon.isNotEmpty ? noTelepon : null;
+      }
+      if (sekolahId != null) {
+        body['sekolah_id'] = sekolahId;
+      }
+
+      final response = await http
+          .put(
+            Uri.parse('$baseUrl/guru/profile'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: json.encode(body),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Unauthorized - Token tidak valid',
+          response.statusCode,
+        );
+      } else {
+        final error = json.decode(response.body);
+        throw ApiException(
+          error['message'] ?? 'Gagal update profil guru',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // Delete account guru
+  Future<void> deleteAccountGuru(String token) async {
+    try {
+      final response = await http
+          .delete(
+            Uri.parse('$baseUrl/guru/profile'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Unauthorized - Token tidak valid',
+          response.statusCode,
+        );
+      } else {
+        final error = json.decode(response.body);
+        throw ApiException(
+          error['message'] ?? 'Gagal hapus akun guru',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
 }

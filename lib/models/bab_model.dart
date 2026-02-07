@@ -4,7 +4,7 @@ part 'bab_model.freezed.dart';
 part 'bab_model.g.dart';
 
 @freezed
-class TopikModel with _$TopikModel {
+abstract class TopikModel with _$TopikModel {
   const factory TopikModel({
     required int id,
     @JsonKey(name: 'bab_id') required int babId,
@@ -20,7 +20,7 @@ class TopikModel with _$TopikModel {
 }
 
 @freezed
-class BabModel with _$BabModel {
+abstract class BabModel with _$BabModel {
   const factory BabModel({
     required int id,
     required String nomor,

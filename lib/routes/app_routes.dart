@@ -16,4 +16,5 @@ abstract class Routes {
   static const QUIZ = '/quiz';
   static const QUIZ_COMPLETE = '/quiz-complete';
   static const QUIZ_RESULT = '/quiz-result';
+  static const REGISTER_TEACHER = '/register-teacher';
 }

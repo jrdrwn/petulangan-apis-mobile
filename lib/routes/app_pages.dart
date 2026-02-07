@@ -3,6 +3,7 @@ import '../screens/splash_screen.dart';
 import '../screens/login_student_screen.dart';
 import '../screens/register_student_screen.dart';
 import '../screens/login_teacher_screen.dart';
+import '../screens/register_teacher_screen.dart';
 import '../screens/select_class_screen.dart';
 import '../screens/student_list_screen.dart';
 import '../screens/student_detail_screen.dart';
@@ -35,6 +36,10 @@ class AppPages {
       page: () => const RegisterStudentScreen(),
     ),
     GetPage(name: Routes.LOGIN_TEACHER, page: () => const LoginTeacherScreen()),
+    GetPage(
+      name: Routes.REGISTER_TEACHER,
+      page: () => const RegisterTeacherScreen(),
+    ),
     GetPage(name: Routes.SELECT_CLASS, page: () => const SelectClassScreen()),
     GetPage(name: Routes.STUDENT_LIST, page: () => const StudentListScreen()),
     GetPage(

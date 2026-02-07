@@ -4,7 +4,7 @@ part 'peserta_didik_guru_model.freezed.dart';
 part 'peserta_didik_guru_model.g.dart';
 
 @freezed
-class PesertaDidikGuruModel with _$PesertaDidikGuruModel {
+abstract class PesertaDidikGuruModel with _$PesertaDidikGuruModel {
   const factory PesertaDidikGuruModel({
     required int id,
     @JsonKey(name: 'nama_lengkap') required String namaLengkap,

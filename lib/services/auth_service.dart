@@ -11,12 +11,22 @@ class AuthService {
   static const String _nameKey = 'user_name';
   static const String _userRoleKey = 'user_role';
   static const String _sekolahIdKey = 'sekolah_id';
+  static const String _nipKey = 'user_nip';
+  static const String _emailKey = 'user_email';
+  static const String _noTeleponKey = 'user_no_telepon';
+  static const String _nisnKey = 'user_nisn';
+  static const String _kelasIdKey = 'user_kelas_id';
 
   // Observable token untuk reactivity
   final token = Rxn<String>();
   final userName = Rxn<String>();
   final userRole = Rxn<String>(); // 'student' atau 'teacher'
   final sekolahId = Rxn<int>();
+  final userNip = Rxn<String>();
+  final userEmail = Rxn<String>();
+  final userNoTelepon = Rxn<String>();
+  final userNisn = Rxn<String>();
+  final userKelasId = Rxn<int>();
 
   AuthService() {
     // Load saved token on init
@@ -32,6 +42,14 @@ class AuthService {
       final savedSekolahId = prefs.getInt(_sekolahIdKey);
       if (savedSekolahId != null) {
         sekolahId.value = savedSekolahId;
+      }
+      userNip.value = prefs.getString(_nipKey);
+      userEmail.value = prefs.getString(_emailKey);
+      userNoTelepon.value = prefs.getString(_noTeleponKey);
+      userNisn.value = prefs.getString(_nisnKey);
+      final savedKelasId = prefs.getInt(_kelasIdKey);
+      if (savedKelasId != null) {
+        userKelasId.value = savedKelasId;
       }
     } catch (e) {
       // Ignore errors during load
@@ -57,10 +75,12 @@ class AuthService {
         final data = json.decode(response.body);
         final loginResponse = LoginResponse.fromJson(data);
 
-        // Save token, name, and role
+        // Save token, name, role, nisn, and kelasId
         await saveToken(loginResponse.token);
         await saveName(loginResponse.pesertaDidik.namaLengkap);
         await saveUserRole('student');
+        await saveNisn(loginResponse.pesertaDidik.nisn);
+        await saveKelasId(loginResponse.pesertaDidik.kelasId);
 
         return loginResponse;
       } else {
@@ -90,11 +110,18 @@ class AuthService {
         final data = json.decode(response.body);
         final loginResponse = LoginGuruResponse.fromJson(data);
 
-        // Save token, name, role, and sekolah_id
+        // Save token, name, role, sekolah_id, and guru data
         await saveToken(loginResponse.token);
         await saveName(loginResponse.guru.namaLengkap);
         await saveUserRole('teacher');
         await saveSekolahId(loginResponse.guru.sekolahId);
+        await saveNip(loginResponse.guru.nip);
+        if (loginResponse.guru.email != null) {
+          await saveEmail(loginResponse.guru.email!);
+        }
+        if (loginResponse.guru.noTelepon != null) {
+          await saveNoTelepon(loginResponse.guru.noTelepon!);
+        }
 
         return loginResponse;
       } else {
@@ -134,6 +161,36 @@ class AuthService {
     await prefs.setInt(_sekolahIdKey, id);
   }
 
+  Future<void> saveNip(String nip) async {
+    userNip.value = nip;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_nipKey, nip);
+  }
+
+  Future<void> saveEmail(String email) async {
+    userEmail.value = email;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_emailKey, email);
+  }
+
+  Future<void> saveNoTelepon(String noTelepon) async {
+    userNoTelepon.value = noTelepon;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_noTeleponKey, noTelepon);
+  }
+
+  Future<void> saveNisn(String nisn) async {
+    userNisn.value = nisn;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_nisnKey, nisn);
+  }
+
+  Future<void> saveKelasId(int id) async {
+    userKelasId.value = id;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kelasIdKey, id);
+  }
+
   String? getToken() {
     return token.value;
   }
@@ -159,11 +216,21 @@ class AuthService {
     userName.value = null;
     userRole.value = null;
     sekolahId.value = null;
+    userNip.value = null;
+    userEmail.value = null;
+    userNoTelepon.value = null;
+    userNisn.value = null;
+    userKelasId.value = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
     await prefs.remove(_nameKey);
     await prefs.remove(_userRoleKey);
     await prefs.remove(_sekolahIdKey);
+    await prefs.remove(_nipKey);
+    await prefs.remove(_emailKey);
+    await prefs.remove(_noTeleponKey);
+    await prefs.remove(_nisnKey);
+    await prefs.remove(_kelasIdKey);
   }
 
   Map<String, String> getAuthHeaders() {

@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import '../routes/app_pages.dart';
 import '../models/bab_model.dart';
+import '../models/sekolah_model.dart';
+import '../models/kelas_model.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/connectivity_service.dart';
@@ -21,6 +23,19 @@ class DashboardStudentController extends GetxController {
   final babList = <BabModel>[].obs;
   final isLoadingBab = false.obs;
   final isDownloadingReport = false.obs;
+
+  // Profile management
+  final profileNamaController = TextEditingController();
+  final profileNisnController = TextEditingController();
+  final sekolahList = <SekolahModel>[].obs;
+  final kelasList = <KelasModel>[].obs;
+  final selectedSekolah = Rxn<SekolahModel>();
+  final selectedKelas = Rxn<KelasModel>();
+  final isLoadingSekolah = false.obs;
+  final isLoadingKelas = false.obs;
+  final isUpdatingProfile = false.obs;
+  final isResettingProgress = false.obs;
+  final isDeletingAccount = false.obs;
 
   // Progress tracking
   int get totalTopik {
@@ -74,6 +89,13 @@ class DashboardStudentController extends GetxController {
     if (args != null && args is Map && args['refresh'] == true) {
       fetchBabTopik();
     }
+  }
+
+  @override
+  void onClose() {
+    profileNamaController.dispose();
+    profileNisnController.dispose();
+    super.onClose();
   }
 
   Future<void> fetchBabTopik() async {
@@ -321,6 +343,249 @@ class DashboardStudentController extends GetxController {
         ),
       ),
     );
+  }
+
+  // Profile management methods
+  Future<void> fetchSekolah() async {
+    try {
+      if (!await _connectivityService.hasConnection()) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Mohon periksa koneksi internet Anda',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          icon: const Icon(Icons.wifi_off, color: Colors.white),
+        );
+        return;
+      }
+
+      isLoadingSekolah.value = true;
+      final schools = await _apiService.getSekolah();
+      sekolahList.value = schools;
+
+      // Auto-select sekolah and kelas based on saved kelasId
+      final savedKelasId = _authService.userKelasId.value;
+      if (savedKelasId != null && schools.isNotEmpty) {
+        for (final sekolah in schools) {
+          try {
+            final classes = await _apiService.getKelasBySekolahId(sekolah.id);
+            final matchingKelas = classes.where((k) => k.id == savedKelasId);
+            if (matchingKelas.isNotEmpty) {
+              selectedSekolah.value = sekolah;
+              kelasList.value = classes;
+              selectedKelas.value = matchingKelas.first;
+              break;
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal memuat data sekolah: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoadingSekolah.value = false;
+    }
+  }
+
+  Future<void> fetchKelasBySekolahId(int sekolahId) async {
+    try {
+      if (!await _connectivityService.hasConnection()) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Mohon periksa koneksi internet Anda',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          icon: const Icon(Icons.wifi_off, color: Colors.white),
+        );
+        return;
+      }
+
+      isLoadingKelas.value = true;
+      kelasList.clear();
+      selectedKelas.value = null;
+
+      final classes = await _apiService.getKelasBySekolahId(sekolahId);
+      kelasList.value = classes;
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal memuat data kelas: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoadingKelas.value = false;
+    }
+  }
+
+  Future<void> updateProfile() async {
+    final nama = profileNamaController.text.trim();
+    final nisn = profileNisnController.text.trim();
+
+    if (nama.isEmpty && nisn.isEmpty && selectedKelas.value == null) {
+      Get.snackbar(
+        'Peringatan',
+        'Isi minimal satu field untuk update',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    try {
+      if (!await _connectivityService.hasConnection()) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Mohon periksa koneksi internet Anda',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          icon: const Icon(Icons.wifi_off, color: Colors.white),
+        );
+        return;
+      }
+
+      isUpdatingProfile.value = true;
+      final token = _authService.getToken()!;
+
+      await _apiService.updateProfilePesertaDidik(
+        namaLengkap: nama.isNotEmpty ? nama : null,
+        nisn: nisn.isNotEmpty ? nisn : null,
+        kelasId: selectedKelas.value?.id,
+        token: token,
+      );
+
+      // Update local data if provided
+      if (nama.isNotEmpty) {
+        await _authService.saveName(nama);
+        studentName.value = nama;
+      }
+      if (nisn.isNotEmpty) {
+        await _authService.saveNisn(nisn);
+      }
+      if (selectedKelas.value != null) {
+        await _authService.saveKelasId(selectedKelas.value!.id);
+      }
+
+      // Refresh data
+      await fetchBabTopik();
+
+      Get.back(); // Close dialog
+      Get.snackbar(
+        'Berhasil',
+        'Profil berhasil diperbarui',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        icon: const Icon(Icons.check_circle, color: Colors.white),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal update profil: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isUpdatingProfile.value = false;
+    }
+  }
+
+  Future<void> resetProgress() async {
+    try {
+      if (!await _connectivityService.hasConnection()) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Mohon periksa koneksi internet Anda',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          icon: const Icon(Icons.wifi_off, color: Colors.white),
+        );
+        return;
+      }
+
+      isResettingProgress.value = true;
+      final token = _authService.getToken()!;
+
+      await _apiService.resetProgressPesertaDidik(token);
+
+      // Refresh data
+      await fetchBabTopik();
+
+      Get.back(); // Close dialog
+      Get.snackbar(
+        'Berhasil',
+        'Progress berhasil direset',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        icon: const Icon(Icons.check_circle, color: Colors.white),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal reset progress: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isResettingProgress.value = false;
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      if (!await _connectivityService.hasConnection()) {
+        Get.snackbar(
+          'Tidak Ada Koneksi',
+          'Mohon periksa koneksi internet Anda',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          icon: const Icon(Icons.wifi_off, color: Colors.white),
+        );
+        return;
+      }
+
+      isDeletingAccount.value = true;
+      final token = _authService.getToken()!;
+
+      await _apiService.deleteAccountPesertaDidik(token);
+
+      // Logout and go back to login
+      await _authService.logout();
+      Get.offAllNamed(Routes.LOGIN_STUDENT);
+      Get.snackbar(
+        'Berhasil',
+        'Akun berhasil dihapus',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        icon: const Icon(Icons.check_circle, color: Colors.white),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal hapus akun: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isDeletingAccount.value = false;
+    }
   }
 
   Future<void> logout() async {

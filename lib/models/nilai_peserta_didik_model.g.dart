@@ -6,8 +6,8 @@ part of 'nilai_peserta_didik_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$NilaiQuizModelImpl _$$NilaiQuizModelImplFromJson(Map<String, dynamic> json) =>
-    _$NilaiQuizModelImpl(
+_NilaiQuizModel _$NilaiQuizModelFromJson(Map<String, dynamic> json) =>
+    _NilaiQuizModel(
       id: (json['id'] as num).toInt(),
       pesertaDidikId: (json['peserta_didik_id'] as num).toInt(),
       topikId: (json['topik_id'] as num).toInt(),
@@ -19,48 +19,45 @@ _$NilaiQuizModelImpl _$$NilaiQuizModelImplFromJson(Map<String, dynamic> json) =>
       tanggalSelesai: json['tanggal_selesai'] as String,
     );
 
-Map<String, dynamic> _$$NilaiQuizModelImplToJson(
-  _$NilaiQuizModelImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'peserta_didik_id': instance.pesertaDidikId,
-  'topik_id': instance.topikId,
-  'hasil_quiz': instance.hasilQuiz,
-  'nilai': instance.nilai,
-  'jumlah_benar': instance.jumlahBenar,
-  'jumlah_salah': instance.jumlahSalah,
-  'waktu_pengerjaan': instance.waktuPengerjaan,
-  'tanggal_selesai': instance.tanggalSelesai,
-};
+Map<String, dynamic> _$NilaiQuizModelToJson(_NilaiQuizModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'peserta_didik_id': instance.pesertaDidikId,
+      'topik_id': instance.topikId,
+      'hasil_quiz': instance.hasilQuiz,
+      'nilai': instance.nilai,
+      'jumlah_benar': instance.jumlahBenar,
+      'jumlah_salah': instance.jumlahSalah,
+      'waktu_pengerjaan': instance.waktuPengerjaan,
+      'tanggal_selesai': instance.tanggalSelesai,
+    };
 
-_$TopikNilaiModelImpl _$$TopikNilaiModelImplFromJson(
-  Map<String, dynamic> json,
-) => _$TopikNilaiModelImpl(
-  id: (json['id'] as num).toInt(),
-  babId: (json['bab_id'] as num).toInt(),
-  kode: json['kode'] as String,
-  judul: json['judul'] as String,
-  deskripsi: json['deskripsi'] as String,
-  topikUrl: json['topik_url'] as String,
-  nilaiQuiz: json['nilai_quiz'] == null
-      ? null
-      : NilaiQuizModel.fromJson(json['nilai_quiz'] as Map<String, dynamic>),
-);
+_TopikNilaiModel _$TopikNilaiModelFromJson(Map<String, dynamic> json) =>
+    _TopikNilaiModel(
+      id: (json['id'] as num).toInt(),
+      babId: (json['bab_id'] as num).toInt(),
+      kode: json['kode'] as String,
+      judul: json['judul'] as String,
+      deskripsi: json['deskripsi'] as String,
+      topikUrl: json['topik_url'] as String,
+      nilaiQuiz: json['nilai_quiz'] == null
+          ? null
+          : NilaiQuizModel.fromJson(json['nilai_quiz'] as Map<String, dynamic>),
+    );
 
-Map<String, dynamic> _$$TopikNilaiModelImplToJson(
-  _$TopikNilaiModelImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'bab_id': instance.babId,
-  'kode': instance.kode,
-  'judul': instance.judul,
-  'deskripsi': instance.deskripsi,
-  'topik_url': instance.topikUrl,
-  'nilai_quiz': instance.nilaiQuiz,
-};
+Map<String, dynamic> _$TopikNilaiModelToJson(_TopikNilaiModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'bab_id': instance.babId,
+      'kode': instance.kode,
+      'judul': instance.judul,
+      'deskripsi': instance.deskripsi,
+      'topik_url': instance.topikUrl,
+      'nilai_quiz': instance.nilaiQuiz,
+    };
 
-_$BabNilaiModelImpl _$$BabNilaiModelImplFromJson(Map<String, dynamic> json) =>
-    _$BabNilaiModelImpl(
+_BabNilaiModel _$BabNilaiModelFromJson(Map<String, dynamic> json) =>
+    _BabNilaiModel(
       id: (json['id'] as num).toInt(),
       nomor: json['nomor'] as String,
       judul: json['judul'] as String,
@@ -71,7 +68,7 @@ _$BabNilaiModelImpl _$$BabNilaiModelImplFromJson(Map<String, dynamic> json) =>
           .toList(),
     );
 
-Map<String, dynamic> _$$BabNilaiModelImplToJson(_$BabNilaiModelImpl instance) =>
+Map<String, dynamic> _$BabNilaiModelToJson(_BabNilaiModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'nomor': instance.nomor,

@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,207 +9,275 @@ part of 'kelas_model.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-KelasModel _$KelasModelFromJson(Map<String, dynamic> json) {
-  return _KelasModel.fromJson(json);
-}
 
 /// @nodoc
 mixin _$KelasModel {
-  int get id => throw _privateConstructorUsedError;
-  String get nama => throw _privateConstructorUsedError;
-  @JsonKey(name: 'sekolah_id')
-  int get sekolahId => throw _privateConstructorUsedError;
+
+ int get id; String get nama;@JsonKey(name: 'sekolah_id') int get sekolahId;
+/// Create a copy of KelasModel
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KelasModelCopyWith<KelasModel> get copyWith => _$KelasModelCopyWithImpl<KelasModel>(this as KelasModel, _$identity);
 
   /// Serializes this KelasModel to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of KelasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $KelasModelCopyWith<KelasModel> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KelasModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.sekolahId, sekolahId) || other.sekolahId == sekolahId));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,nama,sekolahId);
+
+@override
+String toString() {
+  return 'KelasModel(id: $id, nama: $nama, sekolahId: $sekolahId)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $KelasModelCopyWith<$Res> {
-  factory $KelasModelCopyWith(
-    KelasModel value,
-    $Res Function(KelasModel) then,
-  ) = _$KelasModelCopyWithImpl<$Res, KelasModel>;
-  @useResult
-  $Res call({int id, String nama, @JsonKey(name: 'sekolah_id') int sekolahId});
-}
+abstract mixin class $KelasModelCopyWith<$Res>  {
+  factory $KelasModelCopyWith(KelasModel value, $Res Function(KelasModel) _then) = _$KelasModelCopyWithImpl;
+@useResult
+$Res call({
+ int id, String nama,@JsonKey(name: 'sekolah_id') int sekolahId
+});
 
+
+
+
+}
 /// @nodoc
-class _$KelasModelCopyWithImpl<$Res, $Val extends KelasModel>
+class _$KelasModelCopyWithImpl<$Res>
     implements $KelasModelCopyWith<$Res> {
-  _$KelasModelCopyWithImpl(this._value, this._then);
+  _$KelasModelCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final KelasModel _self;
+  final $Res Function(KelasModel) _then;
 
-  /// Create a copy of KelasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? nama = null,
-    Object? sekolahId = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as int,
-            nama: null == nama
-                ? _value.nama
-                : nama // ignore: cast_nullable_to_non_nullable
-                      as String,
-            sekolahId: null == sekolahId
-                ? _value.sekolahId
-                : sekolahId // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of KelasModel
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? nama = null,Object? sekolahId = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,nama: null == nama ? _self.nama : nama // ignore: cast_nullable_to_non_nullable
+as String,sekolahId: null == sekolahId ? _self.sekolahId : sekolahId // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
 }
 
-/// @nodoc
-abstract class _$$KelasModelImplCopyWith<$Res>
-    implements $KelasModelCopyWith<$Res> {
-  factory _$$KelasModelImplCopyWith(
-    _$KelasModelImpl value,
-    $Res Function(_$KelasModelImpl) then,
-  ) = __$$KelasModelImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({int id, String nama, @JsonKey(name: 'sekolah_id') int sekolahId});
 }
 
-/// @nodoc
-class __$$KelasModelImplCopyWithImpl<$Res>
-    extends _$KelasModelCopyWithImpl<$Res, _$KelasModelImpl>
-    implements _$$KelasModelImplCopyWith<$Res> {
-  __$$KelasModelImplCopyWithImpl(
-    _$KelasModelImpl _value,
-    $Res Function(_$KelasModelImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of KelasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? nama = null,
-    Object? sekolahId = null,
-  }) {
-    return _then(
-      _$KelasModelImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as int,
-        nama: null == nama
-            ? _value.nama
-            : nama // ignore: cast_nullable_to_non_nullable
-                  as String,
-        sekolahId: null == sekolahId
-            ? _value.sekolahId
-            : sekolahId // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [KelasModel].
+extension KelasModelPatterns on KelasModel {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _KelasModel value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _KelasModel() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _KelasModel value)  $default,){
+final _that = this;
+switch (_that) {
+case _KelasModel():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _KelasModel value)?  $default,){
+final _that = this;
+switch (_that) {
+case _KelasModel() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String nama, @JsonKey(name: 'sekolah_id')  int sekolahId)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _KelasModel() when $default != null:
+return $default(_that.id,_that.nama,_that.sekolahId);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String nama, @JsonKey(name: 'sekolah_id')  int sekolahId)  $default,) {final _that = this;
+switch (_that) {
+case _KelasModel():
+return $default(_that.id,_that.nama,_that.sekolahId);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String nama, @JsonKey(name: 'sekolah_id')  int sekolahId)?  $default,) {final _that = this;
+switch (_that) {
+case _KelasModel() when $default != null:
+return $default(_that.id,_that.nama,_that.sekolahId);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$KelasModelImpl implements _KelasModel {
-  const _$KelasModelImpl({
-    required this.id,
-    required this.nama,
-    @JsonKey(name: 'sekolah_id') required this.sekolahId,
-  });
 
-  factory _$KelasModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$KelasModelImplFromJson(json);
+class _KelasModel implements KelasModel {
+  const _KelasModel({required this.id, required this.nama, @JsonKey(name: 'sekolah_id') required this.sekolahId});
+  factory _KelasModel.fromJson(Map<String, dynamic> json) => _$KelasModelFromJson(json);
 
-  @override
-  final int id;
-  @override
-  final String nama;
-  @override
-  @JsonKey(name: 'sekolah_id')
-  final int sekolahId;
+@override final  int id;
+@override final  String nama;
+@override@JsonKey(name: 'sekolah_id') final  int sekolahId;
 
-  @override
-  String toString() {
-    return 'KelasModel(id: $id, nama: $nama, sekolahId: $sekolahId)';
-  }
+/// Create a copy of KelasModel
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$KelasModelCopyWith<_KelasModel> get copyWith => __$KelasModelCopyWithImpl<_KelasModel>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$KelasModelImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.nama, nama) || other.nama == nama) &&
-            (identical(other.sekolahId, sekolahId) ||
-                other.sekolahId == sekolahId));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, id, nama, sekolahId);
-
-  /// Create a copy of KelasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$KelasModelImplCopyWith<_$KelasModelImpl> get copyWith =>
-      __$$KelasModelImplCopyWithImpl<_$KelasModelImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$KelasModelImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$KelasModelToJson(this, );
 }
 
-abstract class _KelasModel implements KelasModel {
-  const factory _KelasModel({
-    required final int id,
-    required final String nama,
-    @JsonKey(name: 'sekolah_id') required final int sekolahId,
-  }) = _$KelasModelImpl;
-
-  factory _KelasModel.fromJson(Map<String, dynamic> json) =
-      _$KelasModelImpl.fromJson;
-
-  @override
-  int get id;
-  @override
-  String get nama;
-  @override
-  @JsonKey(name: 'sekolah_id')
-  int get sekolahId;
-
-  /// Create a copy of KelasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$KelasModelImplCopyWith<_$KelasModelImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KelasModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.sekolahId, sekolahId) || other.sekolahId == sekolahId));
 }
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,nama,sekolahId);
+
+@override
+String toString() {
+  return 'KelasModel(id: $id, nama: $nama, sekolahId: $sekolahId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$KelasModelCopyWith<$Res> implements $KelasModelCopyWith<$Res> {
+  factory _$KelasModelCopyWith(_KelasModel value, $Res Function(_KelasModel) _then) = __$KelasModelCopyWithImpl;
+@override @useResult
+$Res call({
+ int id, String nama,@JsonKey(name: 'sekolah_id') int sekolahId
+});
+
+
+
+
+}
+/// @nodoc
+class __$KelasModelCopyWithImpl<$Res>
+    implements _$KelasModelCopyWith<$Res> {
+  __$KelasModelCopyWithImpl(this._self, this._then);
+
+  final _KelasModel _self;
+  final $Res Function(_KelasModel) _then;
+
+/// Create a copy of KelasModel
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? nama = null,Object? sekolahId = null,}) {
+  return _then(_KelasModel(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,nama: null == nama ? _self.nama : nama // ignore: cast_nullable_to_non_nullable
+as String,sekolahId: null == sekolahId ? _self.sekolahId : sekolahId // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+// dart format on

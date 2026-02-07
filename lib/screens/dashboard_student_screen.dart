@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/dashboard_student_controller.dart';
+import '../models/sekolah_model.dart';
+import '../models/kelas_model.dart';
+import '../services/auth_service.dart';
 
 class DashboardStudentScreen extends StatelessWidget {
   const DashboardStudentScreen({super.key});
@@ -407,12 +410,446 @@ class DashboardStudentScreen extends StatelessWidget {
             ),
           ),
         ),
+        const PopupMenuDivider(),
+        // Update profile
+        PopupMenuItem<String>(
+          value: 'update_profile',
+          child: Row(
+            children: [
+              const Icon(Icons.edit, color: Color(0xFF1565C0)),
+              const SizedBox(width: 12),
+              Text(
+                'Update Profil',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Reset progress
+        PopupMenuItem<String>(
+          value: 'reset_progress',
+          child: Row(
+            children: [
+              const Icon(Icons.refresh, color: Colors.orange),
+              const SizedBox(width: 12),
+              Text(
+                'Reset Progress',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Delete account
+        PopupMenuItem<String>(
+          value: 'delete_account',
+          child: Row(
+            children: [
+              const Icon(Icons.delete_forever, color: Colors.red),
+              const SizedBox(width: 12),
+              Text(
+                'Hapus Akun',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
       onSelected: (value) {
         if (value == 'download') {
           controller.downloadLaporan();
+        } else if (value == 'update_profile') {
+          _showUpdateProfileDialog(controller);
+        } else if (value == 'reset_progress') {
+          _showResetProgressDialog(controller);
+        } else if (value == 'delete_account') {
+          _showDeleteAccountDialog(controller);
         }
       },
+    );
+  }
+
+  void _showUpdateProfileDialog(DashboardStudentController controller) {
+    final authService = Get.find<AuthService>();
+    // Pre-fill with saved data
+    controller.profileNamaController.text = controller.studentName.value;
+    controller.profileNisnController.text = authService.userNisn.value ?? '';
+    controller.selectedSekolah.value = null;
+    controller.selectedKelas.value = null;
+    controller.kelasList.clear();
+
+    // Fetch sekolah list and auto-select sekolah+kelas by kelasId
+    controller.fetchSekolah();
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    const Icon(Icons.edit, color: Color(0xFF1565C0), size: 28),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Update Profil',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1565C0),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Nama field
+                TextField(
+                  controller: controller.profileNamaController,
+                  decoration: InputDecoration(
+                    labelText: 'Nama Lengkap',
+                    labelStyle: GoogleFonts.montserrat(),
+                    prefixIcon: const Icon(Icons.person),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF1565C0),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // NISN field
+                TextField(
+                  controller: controller.profileNisnController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'NISN',
+                    labelStyle: GoogleFonts.montserrat(),
+                    prefixIcon: const Icon(Icons.badge),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF1565C0),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Sekolah dropdown
+                Obx(() {
+                  if (controller.isLoadingSekolah.value) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return DropdownButtonFormField<SekolahModel>(
+                    initialValue: controller.selectedSekolah.value,
+                    decoration: InputDecoration(
+                      labelText: 'Sekolah',
+                      labelStyle: GoogleFonts.montserrat(),
+                      prefixIcon: const Icon(Icons.school),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    isExpanded: true,
+                    items: controller.sekolahList
+                        .map(
+                          (sekolah) => DropdownMenuItem<SekolahModel>(
+                            value: sekolah,
+                            child: Text(
+                              sekolah.nama,
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      controller.selectedSekolah.value = value;
+                      if (value != null) {
+                        controller.fetchKelasBySekolahId(value.id);
+                      }
+                    },
+                  );
+                }),
+                const SizedBox(height: 16),
+
+                // Kelas dropdown
+                Obx(() {
+                  if (controller.isLoadingKelas.value) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return DropdownButtonFormField<KelasModel>(
+                    initialValue: controller.selectedKelas.value,
+                    decoration: InputDecoration(
+                      labelText: 'Kelas',
+                      labelStyle: GoogleFonts.montserrat(),
+                      prefixIcon: const Icon(Icons.class_),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    isExpanded: true,
+                    items: controller.kelasList
+                        .map(
+                          (kelas) => DropdownMenuItem<KelasModel>(
+                            value: kelas,
+                            child: Text(
+                              kelas.nama,
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      controller.selectedKelas.value = value;
+                    },
+                  );
+                }),
+                const SizedBox(height: 24),
+
+                // Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Get.back(),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF1565C0)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text(
+                          'Batal',
+                          style: GoogleFonts.montserrat(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1565C0),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Obx(
+                        () => ElevatedButton(
+                          onPressed: controller.isUpdatingProfile.value
+                              ? null
+                              : () => controller.updateProfile(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1565C0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: controller.isUpdatingProfile.value
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'Simpan',
+                                  style: GoogleFonts.montserrat(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _showResetProgressDialog(DashboardStudentController controller) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded,
+                color: Colors.orange, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'Reset Progress',
+              style: GoogleFonts.montserrat(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Apakah kamu yakin ingin mereset semua progress belajar?\n\nSemua data progress akan dihapus dan tidak bisa dikembalikan.',
+          style: GoogleFonts.montserrat(fontSize: 14, color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.montserrat(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          Obx(
+            () => ElevatedButton(
+              onPressed: controller.isResettingProgress.value
+                  ? null
+                  : () => controller.resetProgress(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: controller.isResettingProgress.value
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      'Reset',
+                      style: GoogleFonts.montserrat(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _showDeleteAccountDialog(DashboardStudentController controller) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.delete_forever, color: Colors.red, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'Hapus Akun',
+              style: GoogleFonts.montserrat(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Apakah kamu yakin ingin menghapus akun?\n\n⚠️ Semua data termasuk progress belajar akan dihapus permanen dan tidak bisa dikembalikan.',
+          style: GoogleFonts.montserrat(fontSize: 14, color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.montserrat(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          Obx(
+            () => ElevatedButton(
+              onPressed: controller.isDeletingAccount.value
+                  ? null
+                  : () => controller.deleteAccount(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: controller.isDeletingAccount.value
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      'Hapus',
+                      style: GoogleFonts.montserrat(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
     );
   }
 }

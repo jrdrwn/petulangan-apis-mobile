@@ -6,17 +6,17 @@ part of 'peserta_didik_guru_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PesertaDidikGuruModelImpl _$$PesertaDidikGuruModelImplFromJson(
+_PesertaDidikGuruModel _$PesertaDidikGuruModelFromJson(
   Map<String, dynamic> json,
-) => _$PesertaDidikGuruModelImpl(
+) => _PesertaDidikGuruModel(
   id: (json['id'] as num).toInt(),
   namaLengkap: json['nama_lengkap'] as String,
   nisn: json['nisn'] as String,
   kelasId: (json['kelas_id'] as num).toInt(),
 );
 
-Map<String, dynamic> _$$PesertaDidikGuruModelImplToJson(
-  _$PesertaDidikGuruModelImpl instance,
+Map<String, dynamic> _$PesertaDidikGuruModelToJson(
+  _PesertaDidikGuruModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'nama_lengkap': instance.namaLengkap,

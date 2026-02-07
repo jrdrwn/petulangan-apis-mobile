@@ -6,14 +6,13 @@ part of 'kelas_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$KelasModelImpl _$$KelasModelImplFromJson(Map<String, dynamic> json) =>
-    _$KelasModelImpl(
-      id: (json['id'] as num).toInt(),
-      nama: json['nama'] as String,
-      sekolahId: (json['sekolah_id'] as num).toInt(),
-    );
+_KelasModel _$KelasModelFromJson(Map<String, dynamic> json) => _KelasModel(
+  id: (json['id'] as num).toInt(),
+  nama: json['nama'] as String,
+  sekolahId: (json['sekolah_id'] as num).toInt(),
+);
 
-Map<String, dynamic> _$$KelasModelImplToJson(_$KelasModelImpl instance) =>
+Map<String, dynamic> _$KelasModelToJson(_KelasModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'nama': instance.nama,

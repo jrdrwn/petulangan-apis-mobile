@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/select_class_controller.dart';
 import '../models/kelas_model.dart';
+import '../models/sekolah_model.dart';
+import '../services/api_service.dart';
 import '../services/auth_service.dart';
 
 class SelectClassScreen extends StatefulWidget {
@@ -229,9 +231,10 @@ class _SelectClassScreenState extends State<SelectClassScreen>
 
   Widget _buildProfileDropdown() {
     final authService = Get.find<AuthService>();
-    final teacherName = authService.getUserName() ?? 'Guru';
 
-    return PopupMenuButton<String>(
+    return Obx(() {
+      final teacherName = authService.userName.value ?? 'Guru';
+      return PopupMenuButton<String>(
       offset: const Offset(0, 50),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
@@ -331,6 +334,43 @@ class _SelectClassScreenState extends State<SelectClassScreen>
             ],
           ),
         ),
+        // Update Profile
+        PopupMenuItem<String>(
+          value: 'update_profile',
+          child: Row(
+            children: [
+              const Icon(Icons.edit, color: Color(0xFF1D4B8B), size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'Update Profil',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Delete Account
+        PopupMenuItem<String>(
+          value: 'delete_account',
+          child: Row(
+            children: [
+              const Icon(Icons.delete_forever, color: Colors.red, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'Hapus Akun',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
         PopupMenuItem<String>(
           value: 'logout',
           child: Row(
@@ -352,8 +392,332 @@ class _SelectClassScreenState extends State<SelectClassScreen>
       onSelected: (value) {
         if (value == 'logout') {
           _showLogoutDialog();
+        } else if (value == 'update_profile') {
+          _showUpdateProfileDialog();
+        } else if (value == 'delete_account') {
+          _showDeleteAccountDialog();
         }
       },
+    );
+    });
+  }
+
+  void _showUpdateProfileDialog() {
+    final authService = Get.find<AuthService>();
+    final apiService = ApiService();
+    final namaController = TextEditingController(text: authService.userName.value ?? '');
+    final nipController = TextEditingController(text: authService.userNip.value ?? '');
+    final emailController = TextEditingController(text: authService.userEmail.value ?? '');
+    final passwordController = TextEditingController();
+    final noTeleponController = TextEditingController(text: authService.userNoTelepon.value ?? '');
+    final sekolahList = <SekolahModel>[].obs;
+    final selectedSekolah = Rxn<SekolahModel>();
+    final isLoadingSekolah = false.obs;
+    final isUpdating = false.obs;
+    final obscurePassword = true.obs;
+
+    // Fetch sekolah and auto-select current
+    () async {
+      isLoadingSekolah.value = true;
+      try {
+        sekolahList.value = await apiService.getSekolah();
+        final savedSekolahId = authService.getSekolahId();
+        if (savedSekolahId != null) {
+          final match = sekolahList.where((s) => s.id == savedSekolahId);
+          if (match.isNotEmpty) selectedSekolah.value = match.first;
+        }
+      } catch (_) {}
+      isLoadingSekolah.value = false;
+    }();
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.edit, color: Color(0xFF1D4B8B), size: 28),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Update Profil',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1D4B8B),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Isi field yang ingin diubah saja',
+                  style: GoogleFonts.montserrat(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: namaController,
+                  decoration: InputDecoration(
+                    labelText: 'Nama Lengkap',
+                    labelStyle: GoogleFonts.montserrat(),
+                    prefixIcon: const Icon(Icons.person),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF1D4B8B), width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: nipController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'NIP',
+                    labelStyle: GoogleFonts.montserrat(),
+                    prefixIcon: const Icon(Icons.badge),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF1D4B8B), width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    labelStyle: GoogleFonts.montserrat(),
+                    prefixIcon: const Icon(Icons.email),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF1D4B8B), width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Obx(
+                  () => TextField(
+                    controller: passwordController,
+                    obscureText: obscurePassword.value,
+                    decoration: InputDecoration(
+                      labelText: 'Password Baru',
+                      labelStyle: GoogleFonts.montserrat(),
+                      prefixIcon: const Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscurePassword.value ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () => obscurePassword.value = !obscurePassword.value,
+                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1D4B8B), width: 2),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: noTeleponController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'No. Telepon',
+                    labelStyle: GoogleFonts.montserrat(),
+                    prefixIcon: const Icon(Icons.phone),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF1D4B8B), width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Obx(() {
+                  if (isLoadingSekolah.value) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return DropdownButtonFormField<SekolahModel>(
+                    initialValue: selectedSekolah.value,
+                    decoration: InputDecoration(
+                      labelText: 'Sekolah',
+                      labelStyle: GoogleFonts.montserrat(),
+                      prefixIcon: const Icon(Icons.school),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1D4B8B), width: 2),
+                      ),
+                    ),
+                    isExpanded: true,
+                    items: sekolahList
+                        .map((s) => DropdownMenuItem(value: s, child: Text(s.nama, style: GoogleFonts.montserrat(fontSize: 14), overflow: TextOverflow.ellipsis)))
+                        .toList(),
+                    onChanged: (v) => selectedSekolah.value = v,
+                  );
+                }),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Get.back(),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF1D4B8B)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text('Batal', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, color: const Color(0xFF1D4B8B))),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Obx(
+                        () => ElevatedButton(
+                          onPressed: isUpdating.value
+                              ? null
+                              : () async {
+                                  final nama = namaController.text.trim();
+                                  final nip = nipController.text.trim();
+                                  final email = emailController.text.trim();
+                                  final password = passwordController.text.trim();
+                                  final noTelepon = noTeleponController.text.trim();
+
+                                  if (nama.isEmpty && nip.isEmpty && email.isEmpty && password.isEmpty && noTelepon.isEmpty && selectedSekolah.value == null) {
+                                    Get.snackbar('Peringatan', 'Isi minimal satu field untuk update', backgroundColor: Colors.orange, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+                                    return;
+                                  }
+
+                                  isUpdating.value = true;
+                                  try {
+                                    final token = authService.getToken()!;
+                                    await apiService.updateProfileGuru(
+                                      namaLengkap: nama.isNotEmpty ? nama : null,
+                                      nip: nip.isNotEmpty ? nip : null,
+                                      email: email.isNotEmpty ? email : null,
+                                      password: password.isNotEmpty ? password : null,
+                                      noTelepon: noTelepon.isNotEmpty ? noTelepon : null,
+                                      sekolahId: selectedSekolah.value?.id,
+                                      token: token,
+                                    );
+                                    if (nama.isNotEmpty) {
+                                      await authService.saveName(nama);
+                                    }
+                                    if (nip.isNotEmpty) {
+                                      await authService.saveNip(nip);
+                                    }
+                                    if (email.isNotEmpty) {
+                                      await authService.saveEmail(email);
+                                    }
+                                    if (noTelepon.isNotEmpty) {
+                                      await authService.saveNoTelepon(noTelepon);
+                                    }
+                                    if (selectedSekolah.value != null) {
+                                      await authService.saveSekolahId(selectedSekolah.value!.id);
+                                    }
+                                    Get.back();
+                                    Get.snackbar('Berhasil', 'Profil berhasil diperbarui', backgroundColor: Colors.green, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM, icon: const Icon(Icons.check_circle, color: Colors.white));
+                                  } catch (e) {
+                                    Get.snackbar('Error', 'Gagal update profil: ${e.toString()}', backgroundColor: Colors.red, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+                                  } finally {
+                                    isUpdating.value = false;
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1D4B8B),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: isUpdating.value
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : Text('Simpan', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, color: Colors.white)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _showDeleteAccountDialog() {
+    final authService = Get.find<AuthService>();
+    final apiService = ApiService();
+    final isDeleting = false.obs;
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.delete_forever, color: Colors.red, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'Hapus Akun',
+              style: GoogleFonts.montserrat(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus akun?\n\n⚠️ Semua data akan dihapus permanen dan tidak bisa dikembalikan.',
+          style: GoogleFonts.montserrat(fontSize: 14, color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Batal', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, color: Colors.grey)),
+          ),
+          Obx(
+            () => ElevatedButton(
+              onPressed: isDeleting.value
+                  ? null
+                  : () async {
+                      isDeleting.value = true;
+                      try {
+                        final token = authService.getToken()!;
+                        await apiService.deleteAccountGuru(token);
+                        await authService.logout();
+                        Get.offAllNamed('/login-teacher');
+                        Get.snackbar('Berhasil', 'Akun berhasil dihapus', backgroundColor: Colors.green, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM, icon: const Icon(Icons.check_circle, color: Colors.white));
+                      } catch (e) {
+                        Get.snackbar('Error', 'Gagal hapus akun: ${e.toString()}', backgroundColor: Colors.red, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+                      } finally {
+                        isDeleting.value = false;
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: isDeleting.value
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : Text('Hapus', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
     );
   }
 

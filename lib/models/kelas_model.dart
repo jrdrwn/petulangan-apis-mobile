@@ -4,7 +4,7 @@ part 'kelas_model.freezed.dart';
 part 'kelas_model.g.dart';
 
 @freezed
-class KelasModel with _$KelasModel {
+abstract class KelasModel with _$KelasModel {
   const factory KelasModel({
     required int id,
     required String nama,
