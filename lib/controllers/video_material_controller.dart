@@ -201,6 +201,7 @@ class VideoMaterialController extends GetxController {
       '/quiz',
       arguments: {
         'topikId': topikId,
+        'videoUrl': videoUrl,
         'materialTitle': materialTitle,
         'chapterName': chapterName,
       },

@@ -105,6 +105,7 @@ class _QuizCompleteScreenState extends State<QuizCompleteScreen>
     final materialTitle = args['materialTitle'] as String;
     final chapterName = args['chapterName'] as String;
     final topikId = args['topikId'] as int?;
+    final videoUrl = args['videoUrl'] as String;
     final questions = args['questions'] as List<Question>?;
     final userAnswers = args['userAnswers'] as List<String>?;
 
@@ -288,8 +289,7 @@ class _QuizCompleteScreenState extends State<QuizCompleteScreen>
                                                   '/video-material',
                                                   arguments: {
                                                     'topikId': topikId,
-                                                    'videoUrl':
-                                                        'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                                                    'videoUrl': videoUrl,
                                                     'materialTitle': materialTitle,
                                                     'chapterName': chapterName,
                                                   },

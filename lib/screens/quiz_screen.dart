@@ -37,12 +37,14 @@ class _QuizScreenState extends State<QuizScreen>
   Widget build(BuildContext context) {
     final args = Get.arguments as Map<String, dynamic>;
     final topikId = args['topikId'] as int;
+    final videoUrl = args['videoUrl'] as String;
     final materialTitle = args['materialTitle'] as String;
     final chapterName = args['chapterName'] as String;
 
     final controller = Get.put(
       QuizController(
         topikId: topikId,
+        videoUrl: videoUrl,
         materialTitle: materialTitle,
         chapterName: chapterName,
       ),

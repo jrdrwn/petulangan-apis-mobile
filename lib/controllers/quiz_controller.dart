@@ -8,11 +8,13 @@ import '../services/auth_service.dart';
 
 class QuizController extends GetxController {
   final int topikId;
+  final String videoUrl;
   final String materialTitle;
   final String chapterName;
 
   QuizController({
     required this.topikId,
+    required this.videoUrl,
     required this.materialTitle,
     required this.chapterName,
   });
@@ -379,6 +381,7 @@ class QuizController extends GetxController {
           'materialTitle': materialTitle,
           'chapterName': chapterName,
           'topikId': topikId,
+          'videoUrl': videoUrl,
           'questions': questions,
           'userAnswers': userAnswers,
         },
